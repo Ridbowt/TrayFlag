@@ -4,7 +4,7 @@
 
 TrayFlag is a lightweight, portable utility for Windows that displays the flag of your current IP address's country right in the system tray. It's an ideal tool for VPN users, developers, and anyone who wants to quickly monitor their network location.
 
-![TrayFlag Screenshot](https://raw.githubusercontent.com/Ridbowt/TrayFlag/main/promo/screenshot.png) 
+![TrayFlag Screenshot](https://raw.githubusercontent.com/Ridbowt/TrayFlag/main/Promo/screenshot.png) 
 *(Note: You will need to upload this screenshot yourself, see instructions below)*
 
 ## Features
