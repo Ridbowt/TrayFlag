@@ -6,7 +6,7 @@ TrayFlag is a lightweight, portable utility for Windows that displays the flag o
 
 This version marks a significant technical upgrade, moving from PyInstaller to Nuitka for a faster, more optimized experience.
 
-![TrayFlag Screenshot](Promo/screenshot.png) 
+![TrayFlag Screenshot](promo/screenshot.png) 
 
 ## Features
 
