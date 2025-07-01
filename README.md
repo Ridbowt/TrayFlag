@@ -1,12 +1,12 @@
-# TrayFlag v1.1.0
+# TrayFlag v1.2.0
 
-**A simple and powerful tray indicator for your current IP address location, now rebuilt with Nuitka for enhanced performance.**
+**A simple and powerful tray indicator for your current IP address location, rebuilt with Nuitka for enhanced performance.**
 
 TrayFlag is a lightweight, portable utility for Windows that displays the flag of your current IP address's country right in the system tray. It's an ideal tool for VPN users, developers, and anyone who wants to quickly monitor their network location.
 
-This version marks a significant technical upgrade, moving from PyInstaller to Nuitka for a faster, more optimized experience.
+This version is compiled with Nuitka, translating Python code to C for a faster, more optimized experience.
 
-![TrayFlag Screenshot](promo/screenshot.png) 
+![TrayFlag screenshot](promo/screenshot.png)
 
 ## Features
 
@@ -18,17 +18,14 @@ This version marks a significant technical upgrade, moving from PyInstaller to N
 *   **Customizable:** A user-friendly settings dialog to control update intervals, notifications, sound, and autostart behavior.
 *   **Multilingual:** Supports multiple languages with auto-detection of your system's language on first launch.
 
-### What's New in v1.1.0
-
-*   **Nuitka Compilation:** The application is now compiled with Nuitka, translating Python code to C for a significant performance boost and faster startup.
-*   **Optimized File Structure:** The distribution is now organized with a clean root directory. The main executable is a lightweight launcher, while all dependencies are neatly stored in a `bin` subfolder.
-
 ## Installation
 
 1.  Go to the [**Releases**](https://github.com/Ridbowt/TrayFlag/releases) page.
-2.  Download the latest `.zip` archive (e.g., `TrayFlag-v1.1.0-windows-x64.zip`).
-3.  Unzip the archive to any folder on your computer.
-4.  Run `TrayFlag.exe`.
+2.  Download the latest `.zip` archive (e.g., `TrayFlag-v1.2.0-windows-x64.zip`).
+3.  Unzip the archive. This will create a `TrayFlag.dist` folder.
+4.  Open the `TrayFlag.dist` folder and run `TrayFlag.exe`.
+
+**Important Note:** You will see many files (`.dll`, `.pyd`) alongside `TrayFlag.exe`. **These are all necessary parts of the application** (Python runtime, GUI libraries, etc.). Please do not move or delete them. This file structure is intentionally used to minimize false positive detections by antivirus software.
 
 ## System Requirements
 
@@ -42,4 +39,5 @@ Found a bug or have an idea for a new feature? Feel free to open a new issue in 
 You can also contribute by translating TrayFlag into your language! The translation files are located in `TrayFlag/assets/i18n/`. Simply copy `en.json`, translate the values, and share the new file.
 
 ---
+
 *This application was created by an enthusiast with significant support and consultation from AI assistants (Google AI Studio, ChatGPT).*
