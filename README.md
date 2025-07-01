@@ -22,8 +22,8 @@ This version is compiled with Nuitka, translating Python code to C for a faster,
 
 1.  Go to the [**Releases**](https://github.com/Ridbowt/TrayFlag/releases) page.
 2.  Download the latest `.zip` archive (e.g., `TrayFlag-v1.2.0-windows-x64.zip`).
-3.  Unzip the archive. This will create a `TrayFlag.dist` folder.
-4.  Open the `TrayFlag.dist` folder and run `TrayFlag.exe`.
+3.  Unzip the archive. This will create a `TrayFlag` folder.
+4.  Open the `TrayFlag` folder and run `TrayFlag.exe`.
 
 **Important Note:** You will see many files (`.dll`, `.pyd`) alongside `TrayFlag.exe`. **These are all necessary parts of the application** (Python runtime, GUI libraries, etc.). Please do not move or delete them. This file structure is intentionally used to minimize false positive detections by antivirus software.
 
