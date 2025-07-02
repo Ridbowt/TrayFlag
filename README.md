@@ -1,10 +1,8 @@
 # TrayFlag v1.3.0
 
-**A simple and powerful tray indicator for your current IP address location, rebuilt with Nuitka for enhanced performance and improved network resilience.**
+**A simple and powerful tray indicator for your current IP address location.**
 
 TrayFlag is a lightweight, portable utility for Windows that displays the flag of your current IP address's country right in the system tray. It's an ideal tool for VPN users, developers, and anyone who wants to quickly monitor their network location.
-
-This version is compiled with Nuitka, translating Python code to C for a faster, more optimized experience.
 
 ![TrayFlag screenshot](promo/screenshot.png)
 
