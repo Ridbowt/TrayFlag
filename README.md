@@ -1,6 +1,6 @@
-# TrayFlag v1.2.0
+# TrayFlag v1.3.0
 
-**A simple and powerful tray indicator for your current IP address location, rebuilt with Nuitka for enhanced performance.**
+**A simple and powerful tray indicator for your current IP address location, rebuilt with Nuitka for enhanced performance and improved network resilience.**
 
 TrayFlag is a lightweight, portable utility for Windows that displays the flag of your current IP address's country right in the system tray. It's an ideal tool for VPN users, developers, and anyone who wants to quickly monitor their network location.
 
@@ -11,9 +11,11 @@ This version is compiled with Nuitka, translating Python code to C for a faster,
 ## Features
 
 *   **Real-time Tray Icon:** Instantly see the country flag of your current IP.
+*   **Intelligent IP Monitoring:** The application now smartly monitors your external IP address, requesting full geolocation data (country, city, ISP) only when your IP changes. This approach significantly reduces the number of requests to geolocation services, making the app more efficient and reliable.
+*   **Resilient Operation:** If geolocation services are temporarily unavailable or hit rate limits, the application will continue to display your IP address, providing essential information while waiting for services to recover.
 *   **Detailed Information:** A clean tooltip shows your IP, country code, city, and provider. The context menu provides full, unabbreviated details.
 *   **Interactive History:** View and copy your last 3 IP locations directly from the menu.
-*   **Adaptive Updates:** An intelligent timer saves resources by switching between a fast "active" mode and a slower "idle" mode.
+*   **Adaptive Updates:** An intelligent timer saves resources by switching between a fast "active" mode and a slower "idle" mode. Update intervals are now more dynamic for smoother background operation.
 *   **Fully Portable:** Leaves no traces in the registry. All settings are stored in a local `TrayFlag.ini` file.
 *   **Customizable:** A user-friendly settings dialog to control update intervals, notifications, sound, and autostart behavior.
 *   **Multilingual:** Supports multiple languages with auto-detection of your system's language on first launch.
@@ -21,7 +23,7 @@ This version is compiled with Nuitka, translating Python code to C for a faster,
 ## Installation
 
 1.  Go to the [**Releases**](https://github.com/Ridbowt/TrayFlag/releases) page.
-2.  Download the latest `.zip` archive (e.g., `TrayFlag-v1.2.0-windows-x64.zip`).
+2.  Download the latest `.zip` archive (e.g., `TrayFlag-v1.3.0-windows-x64.zip`).
 3.  Unzip the archive. This will create a `TrayFlag` folder.
 4.  Open the `TrayFlag` folder and run `TrayFlag.exe`.
 
