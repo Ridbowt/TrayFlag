@@ -10,12 +10,12 @@ from collections import deque
 from functools import partial
 from PyQt6 import QtWidgets, QtGui, QtCore
 from PyQt6.QtCore import QSettings
-import threading # <--- ДОБАВЛЕН ИМПОРТ threading
+import threading
 
 # =============================================================================
 #  Глобальные переменные и константы
 # =============================================================================
-__version__ = "1.3.0" # <--- ВЕРСИЯ ОБНОВЛЕНА
+__version__ = "1.4.0" # <--- ВЕРСИЯ ОБНОВЛЕНА
 APP_NAME = "TrayFlag"
 ORG_NAME = "YourCompany" # <--- Имя вашей организации, можно любое
 
@@ -46,8 +46,8 @@ def get_base_path():
         # os.path.abspath(__file__) дает полный путь к текущему скрипту (TrayFlag.py).
         # os.path.dirname(...) вернет путь к папке, где лежит скрипт (например, src).
         # Пример: F:\Scripts\Python\TrayFlag\src
-        #return os.path.abspath(os.path.join(os.path.dirname(__file__), '..')) # <--- ВОЗВРАЩЕНО ПРЕДЫДУЩЕЕ ИСПРАВЛЕНИЕ
-        return os.path.dirname(os.path.abspath(__file__))
+        # return os.path.abspath(os.path.join(os.path.dirname(__file__), '..')) # <--- ПРИ ЗАПУСКЕ .PY СКРИПТА
+        return os.path.dirname(os.path.abspath(__file__)) # <--- ПРИ ЗАПУСКЕ .EXE ПРИЛОЖЕНИЯ
 def resource_path(relative_path):
     """
     Возвращает полный путь к файлу ресурсов.
@@ -67,7 +67,7 @@ def ensure_ini_file_exists(file_path):
         try:
             with open(file_path, 'w', encoding='utf-8') as f:
                 f.write(f"[{APP_NAME}]\n")
-                f.write("version = 1.0\n")
+                f.write(f"version = {__version__}\n") # <--- ИЗМЕНЕНО
             print(f"Created new INI file at: {file_path}")
         except Exception as e:
             print(f"ERROR: Could not create INI file at {file_path}: {e}")
@@ -259,13 +259,6 @@ class Translator:
                 "could_not_get_any_ip_data": "Не удалось получить никаких данных об IP.",
                 "unexpected_error_occurred": "Произошла непредвиденная ошибка: {error_msg}"
             })
-        elif self.current_lang == "Spanish":
-            self.translations.update({
-                "no_external_ip_detected": "No se detectó IP externa.",
-                "full_data_unavailable": "Datos completos no disponibles para {ip}: {error_msg}",
-                "could_not_get_any_ip_data": "No se pudieron obtener datos de IP.",
-                "unexpected_error_occurred": "Ocurrió un error inesperado: {error_msg}"
-            })
         else: # English
             self.translations.update({
                 "no_external_ip_detected": "No external IP detected.",
@@ -285,7 +278,7 @@ class AboutDialog(QtWidgets.QDialog):
         title_label = QtWidgets.QLabel(f"<b>{APP_NAME}</b>")
         font = title_label.font(); font.setPointSize(14); title_label.setFont(font)
         title_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignHCenter)
-        release_date = "2025-07-03" # <--- ОБНОВЛЕНА ДАТА РЕЛИЗА
+        release_date = "2025-07-11" # <--- ОБНОВЛЕНА ДАТА РЕЛИЗА
         version_label = QtWidgets.QLabel(tr.get("about_version", version=version, release_date=release_date))
         version_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignHCenter)
         website_label = QtWidgets.QLabel(f'<a href="https://github.com/Ridbowt/TrayFlag">{tr.get("about_website")}</a>')
@@ -296,6 +289,7 @@ class AboutDialog(QtWidgets.QDialog):
         ack_html = (
             f"<style>ul {{ list-style-type: none; padding-left: 0; margin-left: 0; }} li {{ margin-bottom: 5px; }}</style>"
             f"<ul>"
+            f"{tr.get('ack_ip_services')}"
             f"{tr.get('ack_flags')}"
             f"{tr.get('ack_app_icon')}"
             f"{tr.get('ack_logo_builder')}"
@@ -335,16 +329,11 @@ class SettingsDialog(QtWidgets.QDialog):
         lang_label = QtWidgets.QLabel(tr.get("settings_language"))
         lang_label.setToolTip(tr.get("settings_language_tooltip"))
         form_layout.addRow(lang_label, self.language_combo)
-        self.active_interval_spinbox = QtWidgets.QSpinBox()
-        self.active_interval_spinbox.setMinimum(4); self.active_interval_spinbox.setMaximum(300); self.active_interval_spinbox.setSuffix(" s")
-        active_label = QtWidgets.QLabel(tr.get("settings_active_interval"))
-        active_label.setToolTip(tr.get("settings_active_tooltip"))
-        form_layout.addRow(active_label, self.active_interval_spinbox)
-        self.idle_interval_spinbox = QtWidgets.QSpinBox()
-        self.idle_interval_spinbox.setMinimum(0); self.idle_interval_spinbox.setMaximum(3600); self.idle_interval_spinbox.setSuffix(" s")
-        idle_label = QtWidgets.QLabel(tr.get("settings_idle_interval"))
-        idle_label.setToolTip(tr.get("settings_idle_tooltip"))
-        form_layout.addRow(idle_label, self.idle_interval_spinbox)
+        self.update_interval_spinbox = QtWidgets.QSpinBox()
+        self.update_interval_spinbox.setMinimum(4); self.update_interval_spinbox.setMaximum(300); self.update_interval_spinbox.setSuffix(" s")
+        active_label = QtWidgets.QLabel(tr.get("settings_update_interval"))
+        active_label.setToolTip(tr.get("settings_update_tooltip"))
+        form_layout.addRow(active_label, self.update_interval_spinbox)
         self.autostart_checkbox = QtWidgets.QCheckBox(tr.get("settings_autostart"))
         self.autostart_checkbox.setToolTip(tr.get("settings_autostart_tooltip"))
         form_layout.addRow(self.autostart_checkbox)
@@ -360,8 +349,7 @@ class SettingsDialog(QtWidgets.QDialog):
         self.load_settings()
 
     def load_settings(self):
-        self.active_interval_spinbox.setValue(self.settings.value("intervals/active", 7, type=int))
-        self.idle_interval_spinbox.setValue(self.settings.value("intervals/idle", 0, type=int))
+        self.update_interval_spinbox.setValue(self.settings.value("intervals/active", 7, type=int))
         self.autostart_checkbox.setChecked(self.settings.value("main/autostart", False, type=bool))
         self.notifications_checkbox.setChecked(self.settings.value("main/notifications", True, type=bool))
         self.sound_checkbox.setChecked(self.settings.value("main/sound", True, type=bool))
@@ -369,8 +357,7 @@ class SettingsDialog(QtWidgets.QDialog):
             self.language_combo.setCurrentIndex(self.language_combo.findData(self.current_lang))
 
     def accept(self):
-        self.settings.setValue("intervals/active", self.active_interval_spinbox.value())
-        self.settings.setValue("intervals/idle", self.idle_interval_spinbox.value())
+        self.settings.setValue("intervals/active", self.update_interval_spinbox.value())
         self.settings.setValue("main/autostart", self.autostart_checkbox.isChecked())
         self.settings.setValue("main/notifications", self.notifications_checkbox.isChecked())
         self.settings.setValue("main/sound", self.sound_checkbox.isChecked())
@@ -384,15 +371,11 @@ class TrayFlag(QtWidgets.QSystemTrayIcon):
         
         self.current_location_data = {}
         self.location_history = deque(maxlen=3)
-        self.idle_check_counter = 0
-        self.IDLE_TRANSITION_THRESHOLD = 3
-        self.is_idle_mode = False
-        self.last_known_external_ip = "" # <--- НОВОЕ ПОЛЕ
+        self.last_known_external_ip = ""
 
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.update_location_icon)
         
-        # --- Вызов ensure_ini_file_exists перед инициализацией QSettings ---
         ensure_ini_file_exists(SETTINGS_FILE_PATH)
         self.settings = QSettings(SETTINGS_FILE_PATH, QSettings.Format.IniFormat)
         
@@ -400,11 +383,13 @@ class TrayFlag(QtWidgets.QSystemTrayIcon):
         self.flags_dir = "assets/flags"
         
         self.tr = Translator(self.i18n_dir)
-        self.tr.add_new_strings() # <--- ВЫЗОВ НОВОЙ ФУНКЦИИ ДЛЯ ДОБАВЛЕНИЯ СТРОК ЛОКАЛИЗАЦИИ
+        self.tr.add_new_strings()
         self.load_app_settings()
         
+        # ИЗМЕНЕНИЕ: Загрузка двух звуковых файлов
         self.app_icon = self.load_app_icon()
-        self.sound_samples, self.sound_samplerate = self.load_sound_file()
+        self.sound_samples, self.sound_samplerate = self.load_sound_file("notification.wav")
+        self.alert_sound_samples, self.alert_sound_samplerate = self.load_sound_file("alert.wav")
         
         self.create_menu()
         self.no_internet_icon = self.create_no_internet_icon()
@@ -413,7 +398,7 @@ class TrayFlag(QtWidgets.QSystemTrayIcon):
         self.setToolTip(self.tr.get("initializing_tooltip"))
         
         self.activated.connect(self.on_activated)
-        QtCore.QTimer.singleShot(100, self.update_location_icon) # Первый запуск
+        QtCore.QTimer.singleShot(100, self.update_location_icon)
 
     def load_app_settings(self):
         saved_lang = self.settings.value("main/language", "")
@@ -426,12 +411,19 @@ class TrayFlag(QtWidgets.QSystemTrayIcon):
         if not self.settings.contains("main/language"):
             self.settings.setValue("main/language", final_lang)
 
-        self.active_interval = self.settings.value("intervals/active", 7, type=int)
-        if not self.settings.contains("intervals/active"): self.settings.setValue("intervals/active", self.active_interval)
-        
-        self.idle_interval = self.settings.value("intervals/idle", 0, type=int)
-        if not self.settings.contains("intervals/idle"): self.settings.setValue("intervals/idle", self.idle_interval)
+        # --- ДОБАВЛЕНА ЛОГИКА ОБНОВЛЕНИЯ ВЕРСИИ INI-ФАЙЛА ---
+        current_ini_version = self.settings.value(f"{APP_NAME}/version", "0.0.0", type=str) # Получаем версию из INI
+        if current_ini_version != __version__:
+            print(f"INFO: INI version mismatch. Updating from {current_ini_version} to {__version__}.")
+            self.settings.setValue(f"{APP_NAME}/version", __version__) # Обновляем версию в INI
+            # Здесь можно добавить логику миграции настроек, если версии сильно отличаются
+            # Например, если в новой версии изменились названия ключей и т.д.
+            # Пока просто обновляем версию.
+        # --- КОНЕЦ ЛОГИКИ ОБНОВЛЕНИЯ ВЕРСИИ ---
 
+        self.update_interval = self.settings.value("intervals/active", 7, type=int)
+        if not self.settings.contains("intervals/active"): self.settings.setValue("intervals/active", self.update_interval)
+        
         self.notifications_enabled = self.settings.value("main/notifications", True, type=bool)
         if not self.settings.contains("main/notifications"): self.settings.setValue("main/notifications", self.notifications_enabled)
 
@@ -444,16 +436,11 @@ class TrayFlag(QtWidgets.QSystemTrayIcon):
         self.reset_to_active_mode()
 
     def schedule_next_update(self):
-        if self.is_idle_mode:
-            base_interval = self.idle_interval
-            if base_interval == 0: # Если idle_interval = 0, используем 60 секунд по умолчанию
-                base_interval = 60
-            jitter_amount = base_interval * 0.20 # 20% джиттера
-            random_interval = random.uniform(base_interval - jitter_amount, base_interval + jitter_amount)
-        else:
-            base_interval = self.active_interval
-            jitter_amount = 3 # Джиттер 4-10 сек, среднее 7 сек.
-            random_interval = random.uniform(base_interval - jitter_amount, base_interval + jitter_amount)
+        # ИЗМЕНЕНИЕ В schedule_next_update: УДАЛЕНИЕ ЛОГИКИ IDLE MODE
+        # Теперь всегда используется update_interval
+        base_interval = self.update_interval # Всегда используем активный интервал
+        jitter_amount = 3 # Джиттер 4-10 сек, среднее 7 сек.
+        random_interval = random.uniform(base_interval - jitter_amount, base_interval + jitter_amount)
         
         interval_ms = int(random_interval * 1000)
         if interval_ms < 1000: # Минимум 1 секунда
@@ -462,8 +449,6 @@ class TrayFlag(QtWidgets.QSystemTrayIcon):
         self.timer.start(interval_ms)
 
     def reset_to_active_mode(self):
-        self.is_idle_mode = False
-        self.idle_check_counter = 0
         self.schedule_next_update()
 
     def open_settings_dialog(self):
@@ -486,74 +471,92 @@ class TrayFlag(QtWidgets.QSystemTrayIcon):
     def update_location_icon(self, is_forced_by_user=False):
         if is_forced_by_user:
             if self.timer.isActive(): self.timer.stop()
-            self.reset_to_active_mode()
+            self.reset_to_active_mode() 
 
         try:
-            # Шаг 1: Получаем только внешний IP от ipify.org
             current_external_ip = get_current_external_ip()
             
+            # ИЗМЕНЕНИЕ В update_location_icon: ОБНОВЛЕНИЕ ЛОГИКИ ОБРАБОТКИ IP И GUI
+            # Мы хотим обновить GUI, если IP изменился ИЛИ если он был N/A и стал реальным
+            # ИЛИ если это принудительное обновление.
+
+            # Флаг, указывающий, нужно ли обновить GUI и сбросить режим
+            should_update_gui_and_reset = False
+
             if current_external_ip == "N/A":
-                # Если не удалось получить IP, возможно, нет интернета
+                # Если IP не обнаружен, всегда показываем иконку "нет интернета"
                 self.setIcon(self.app_icon or self.no_internet_icon)
                 self.setToolTip(self.tr.get("error_tooltip", error=self.tr.get("no_external_ip_detected")))
-                if not is_forced_by_user:
-                    self.schedule_next_update()
-                return
+                
+                # Если последний известный IP был реальным, а теперь N/A, это считается изменением
+                if self.last_known_external_ip != "N/A":
+                    should_update_gui_and_reset = True
+                    # ДОБАВЛЕНО: Уведомление и звук при потере сети
+                    if self.notifications_enabled:
+                        self.showMessage(self.tr.get("network_lost_title"), self.tr.get("network_lost_message"), self.icon(), 5000)
+                        self.play_alert_sound_threaded()
+                
+                # Обновляем last_known_external_ip на N/A, чтобы отслеживать переход
+                self.last_known_external_ip = "N/A" 
 
-            # Шаг 2: Сравниваем с последним известным IP
-            ip_changed = (current_external_ip != self.last_known_external_ip) or (self.last_known_external_ip == "")
-            
-            if ip_changed or is_forced_by_user:
-                # Если IP изменился или это принудительное обновление, получаем полные данные
-                print(f"IP changed from {self.last_known_external_ip} to {current_external_ip} or forced update. Getting full data.")
+            else: # current_external_ip НЕ "N/A" (получен реальный IP)
+                # Если IP изменился (включая переход из N/A в реальный)
+                if current_external_ip != self.last_known_external_ip:
+                    should_update_gui_and_reset = True
+                
+                # Если это принудительное обновление, всегда обновляем GUI
+                if is_forced_by_user:
+                    should_update_gui_and_reset = True
+
+                # Пытаемся получить полные данные
+                new_data = None
                 try:
                     new_data = get_location_data_full(current_external_ip)
                 except (ConnectionError, ValueError) as e:
-                    # Если не удалось получить полные данные, но IP известен, показываем только IP
+                    # Если не удалось получить полные данные, но IP известен, используем частичные
                     new_data = {'ip': current_external_ip, 'country_code': '??', 'city': 'N/A', 'isp': 'N/A'}
-                    self.setIcon(self.app_icon or self.no_internet_icon)
-                    self.setToolTip(self.tr.get("error_tooltip", error=self.tr.get("full_data_unavailable", ip=current_external_ip, error_msg=str(e))))
                     print(f"Warning: Failed to get full data for {current_external_ip}: {e}")
                 
-                # Если полные данные успешно получены (или получены частичные данные)
+                # Если данные получены (даже частичные)
                 if new_data and new_data.get('ip') != 'N/A':
-                    self.last_known_external_ip = new_data['ip']
+                    self.last_known_external_ip = new_data['ip'] # Обновляем последний известный IP
+                    
+                    # Обновляем историю и текущие данные
                     if self.current_location_data:
                         self.location_history.append(self.current_location_data)
                     self.current_location_data = new_data
-                    self.update_gui_with_new_data()
-                    self.reset_to_active_mode()
+                    
+                    # Если нужно обновить GUI (IP изменился или принудительное обновление)
+                    if should_update_gui_and_reset:
+                        self.update_gui_with_new_data()
                 else:
+                    # Если даже после попытки получить полные данные, ничего не вышло (очень редкий случай)
                     self.setIcon(self.app_icon or self.no_internet_icon)
                     self.setToolTip(self.tr.get("error_tooltip", error=self.tr.get("could_not_get_any_ip_data")))
-                return
+                    should_update_gui_and_reset = True # Считаем это изменением, чтобы сбросить таймер
+
+            # В конце, если нужно обновить GUI и сбросить режим, делаем это
+            if should_update_gui_and_reset:
+                self.reset_to_active_mode() # Всегда сбрасываем в активный режим (который теперь единственный)
             else:
-                # IP не изменился
-                if is_forced_by_user:
-                    if self.notifications_enabled:
-                        self.showMessage(self.tr.get("ip_confirmed_title"), self.tr.get("ip_confirmed_message", ip=current_external_ip), self.icon(), 3000)
-                    self.play_notification_sound_threaded()
-                else:
-                    if not self.is_idle_mode:
-                        self.idle_check_counter += 1
-                        if self.idle_check_counter >= self.IDLE_TRANSITION_THRESHOLD:
-                            self.is_idle_mode = True
-                
-                if not is_forced_by_user:
-                    self.schedule_next_update()
+                # Если IP не изменился и не было принудительного обновления,
+                # просто планируем следующее обновление (таймер всегда в активном режиме)
+                self.schedule_next_update()
+
 
         except Exception as e:
+            # Обработка любых непредвиденных ошибок
             self.setIcon(self.app_icon or self.no_internet_icon)
             self.setToolTip(self.tr.get("error_tooltip", error=self.tr.get("unexpected_error_occurred", error_msg=str(e))))
             print(f"CRITICAL ERROR in update_location_icon: {e}")
-            if not is_forced_by_user:
-                self.schedule_next_update()
+            # В случае критической ошибки, всегда сбрасываем в активный режим
+            self.reset_to_active_mode()
 
     def update_gui_with_new_data(self):
         data = self.current_location_data
         ip = data.get('ip', 'N/A'); city = data.get('city', 'N/A')
-        isp = clean_isp_name(data.get('isp', 'N/A'))
-        country_code = data.get('country_code', '')
+        isp = clean_isp_name(self.current_location_data.get('isp', 'N/A'))
+        country_code = self.current_location_data.get('country_code', '')
         icon_filename = f"{country_code}.png"
         icon = self.load_icon_from_file(icon_filename)
         self.setIcon(icon if icon else self.app_icon or self.no_internet_icon)
@@ -563,10 +566,20 @@ class TrayFlag(QtWidgets.QSystemTrayIcon):
                         f"{truncate_text(city, MAX_LEN)}\n"
                         f"{truncate_text(isp, MAX_LEN)}")
         self.setToolTip(tooltip_text)
-        self.update_menu_content()
+        self.update_menu_content() # <--- ЭТУ СТРОКУ НУЖНО БЫЛО УДАЛИТЬ (причина RecursionError)
         if self.notifications_enabled:
             self.showMessage(self.tr.get("location_updated_title"), self.tr.get("location_updated_message", ip=ip, city=city, country_code=country_code.upper()), self.icon(), 5000)
         self.play_notification_sound_threaded()
+
+    # ИЗМЕНЕНИЕ: load_sound_file теперь принимает имя файла
+    def load_sound_file(self, filename):
+        if not sound_libs_available: return None, None
+        try:
+            sound_path = resource_path(os.path.join("assets", "sounds", filename))
+            if not os.path.isfile(sound_path): raise FileNotFoundError(f"Sound file not found: {sound_path}")
+            return sf.read(sound_path, dtype='float32')
+        except Exception as e:
+            print(f"Error loading sound file: {e}"); return None, None
 
     def play_notification_sound_threaded(self):
         if not sound_libs_available or self.sound_samples is None: return
@@ -575,6 +588,16 @@ class TrayFlag(QtWidgets.QSystemTrayIcon):
                 sd.play(self.sound_samples, self.sound_samplerate); sd.wait()
             except Exception as e:
                 print(f"Error in sound playback thread: {e}")
+        sound_thread = threading.Thread(target=sound_playback_task); sound_thread.start()
+
+    # ДОБАВЛЕНО: Новый метод для проигрывания аварийного звука
+    def play_alert_sound_threaded(self):
+        if not sound_libs_available or self.alert_sound_samples is None: return
+        def sound_playback_task():
+            try:
+                sd.play(self.alert_sound_samples, self.alert_sound_samplerate); sd.wait()
+            except Exception as e:
+                print(f"Error in alert sound playback thread: {e}")
         sound_thread = threading.Thread(target=sound_playback_task); sound_thread.start()
         
     def create_menu(self):
@@ -604,10 +627,10 @@ class TrayFlag(QtWidgets.QSystemTrayIcon):
         except Exception as e:
             print(f"Error loading logo: {e}"); return None
 
-    def load_sound_file(self):
+    def load_sound_file(self, filename): # <--- ИЗМЕНЕНО
         if not sound_libs_available: return None, None
         try:
-            sound_path = resource_path(os.path.join("assets", "sounds", "notification.wav"))
+            sound_path = resource_path(os.path.join("assets", "sounds", filename)) # <--- ИЗМЕНЕНО
             if not os.path.isfile(sound_path): raise FileNotFoundError(f"Sound file not found: {sound_path}")
             return sf.read(sound_path, dtype='float32')
         except Exception as e:
@@ -659,7 +682,7 @@ class TrayFlag(QtWidgets.QSystemTrayIcon):
             pixmap = QtGui.QPixmap(path)
             return None if pixmap.isNull() else QtGui.QIcon(pixmap.scaled(size, size, QtCore.Qt.AspectRatioMode.KeepAspectRatio, QtCore.Qt.TransformationMode.SmoothTransformation))
         except Exception as e:
-            print(f"Error loading icon file: {path}: {e}"); return None
+            print(f"Error loading icon file: {e}"); return None
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)

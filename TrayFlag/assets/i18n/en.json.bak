@@ -26,11 +26,10 @@
     "about_version": "Version {version} ({release_date})",
     "about_website": "Program Website",
     "about_acknowledgements": "Acknowledgements & Resources",
-    "ack_ip_services": "<li><b>IP Geolocation Services:</b> <a href=\"https://www.ipify.org/\">ipify.org</a>, <a href=\"https://ip-api.com/\">ip-api.com</a>, <a href=\"https://ipinfo.io/\">ipinfo.io</a>, <a href=\"https://www.ip-tracker.org/\">ip-tracker.org</a></li>",
     "ack_flags": "<li><b>Country Flags:</b> <a href=\"https://github.com/lipis/flag-icons\">lipis/flag-icons</a></li>",
     "ack_app_icon": "<li><b>App Icon:</b> by <a href=\"https://www.freepik.com\">Freepik</a> from <a href=\"https://www.flaticon.com/free-icon/place_449970\">Flaticon</a></li>",
     "ack_logo_builder": "<li><b>Logo Builder:</b> <a href=\"https://favicon.io/\">favicon.io</a></li>",
-    "ack_sound": "<li><b>Sounds:</b> <a href=\"https://pixabay.com/users/universfield-28281460/\">pixabay.com</a> (Universfield - Error 08, New notification 09)</li>",
+    "ack_sound": "<li><b>Sound:</b> <a href=\"https://pixabay.com/sound-effects/new-notification-09-352705/\">pixabay.com</a></li>",
     "ack_code": "<li><b>Code & Ideas:</b> <a href=\"https://stackoverflow.com/a/46595209\">Stack Overflow</a></li>",
     "ack_ai": "<li><b>AI Assistants:</b> <a href=\"https://aistudio.google.com/\">Google AI Studio</a>, <a href=\"https://chatgpt.com/\">ChatGPT</a></li>",
     "settings_dialog_title": "Settings for {app_name}",
@@ -43,12 +42,5 @@
     "settings_notifications": "Show popup notifications",
     "settings_sound": "Play sound on IP change",
     "historical_ip_source": "Historical IP Address",
-    "current_ip_source": "Current IP Address",
-    
-    "no_external_ip_detected": "No external IP detected.",
-    "full_data_unavailable": "Full data unavailable for {ip}: {error_msg}",
-    "could_not_get_any_ip_data": "Could not get any IP data.",
-    "unexpected_error_occurred": "An unexpected error occurred: {error_msg}",
-    "network_lost_title": "Network Lost!",
-    "network_lost_message": "No external IP detected. Check your internet connection."
+    "current_ip_source": "Current IP Address"
 }

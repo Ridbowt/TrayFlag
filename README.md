@@ -1,4 +1,4 @@
-# TrayFlag v1.3.0
+# TrayFlag v1.4.0
 
 [English](README.md) | [Русский](README.ru.md)
 
@@ -11,19 +11,19 @@ TrayFlag is a lightweight, portable utility for Windows that displays the flag o
 ## Features
 
 *   **Real-time Tray Icon:** Instantly see the country flag of your current IP.
-*   **Intelligent IP Monitoring:** The application now smartly monitors your external IP address, requesting full geolocation data (country, city, ISP) only when your IP changes. This approach significantly reduces the number of requests to geolocation services, making the app more efficient and reliable.
-*   **Resilient Operation:** If geolocation services are temporarily unavailable or hit rate limits, the application will continue to display your IP address, providing essential information while waiting for services to recover.
+*   **Intelligent IP Monitoring:** The application efficiently monitors your external IP address, requesting full geolocation data (country, city, ISP) only when necessary. This approach significantly reduces the number of requests to geolocation services, making the app more efficient and reliable.
+*   **Resilient Operation:** If geolocation services are temporarily unavailable or your internet connection is lost, the application will actively attempt to restore connection and provide essential information. An audible alert can notify you of network issues.
 *   **Detailed Information:** A clean tooltip shows your IP, country code, city, and provider. The context menu provides full, unabbreviated details.
 *   **Interactive History:** View and copy your last 3 IP locations directly from the menu.
-*   **Adaptive Updates:** An intelligent timer saves resources by switching between a fast "active" mode and a slower "idle" mode. Update intervals are now more dynamic for smoother background operation.
-*   **Fully Portable:** Leaves no traces in the registry. All settings are stored in a local `TrayFlag.ini` file.
-*   **Customizable:** A user-friendly settings dialog to control update intervals, notifications, sound, and autostart behavior.
+*   **Consistent Updates:** The application now consistently checks your IP at a single, user-defined "Update Interval" (e.g., every 7 seconds with a small random variation), ensuring continuous monitoring.
+*   **Fully Portable:** Leaves no traces in the registry. All settings are stored in a local `TrayFlag.ini` file. The `TrayFlag.ini` file's version is automatically updated upon launch if it differs from the application's version.
+*   **Customizable:** A user-friendly settings dialog to control the "Update Interval", notifications, sound, and autostart behavior.
 *   **Multilingual:** Supports multiple languages with auto-detection of your system's language on first launch.
 
 ## Installation
 
 1.  Go to the [**Releases**](https://github.com/Ridbowt/TrayFlag/releases) page.
-2.  Download the latest `.zip` archive (e.g., `TrayFlag-v1.3.0-windows-x64.zip`).
+2.  Download the latest `.zip` archive (e.g., `TrayFlag-v1.4.0-windows-x64.zip`).
 3.  Unzip the archive. This will create a `TrayFlag` folder.
 4.  Open the `TrayFlag` folder and run `TrayFlag.exe`.
 
