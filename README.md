@@ -1,4 +1,6 @@
-# TrayFlag v1.5.0
+# TrayFlag
+
+[![GitHub release](https://img.shields.io/github/v/release/Ridbowt/TrayFlag?label=version)](https://github.com/Ridbowt/TrayFlag/releases)
 
 **English** | [Русский](README.ru.md)
 
