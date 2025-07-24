@@ -1,6 +1,6 @@
-﻿import sys
+﻿import subprocess
+import sys
 import os
-import requests
 import webbrowser
 import json
 import locale
@@ -15,7 +15,7 @@ import threading
 # =============================================================================
 #  Глобальные переменные и константы
 # =============================================================================
-__version__ = "1.4.0" # <--- ВЕРСИЯ ОБНОВЛЕНА
+__version__ = "1.5.0" # <--- ВЕРСИЯ ОБНОВЛЕНА
 APP_NAME = "TrayFlag"
 ORG_NAME = "YourCompany" # <--- Имя вашей организации, можно любое
 
@@ -72,73 +72,25 @@ def ensure_ini_file_exists(file_path):
         except Exception as e:
             print(f"ERROR: Could not create INI file at {file_path}: {e}")
 
-# --- НОВАЯ ФУНКЦИЯ: Получение только внешнего IP ---
-def get_current_external_ip():
+def get_ip_data_from_go():
     """
-    Получает только текущий внешний IP-адрес с легкого сервиса ipify.org.
+    Runs the external Go executable to get IP data and returns the parsed JSON.
     """
+    go_exe_path = resource_path("ip_lookup.exe")
+    if not os.path.isfile(go_exe_path):
+        print(f"Error: Go executable not found at {go_exe_path}")
+        return None
+    
     try:
-        response = requests.get("https://api.ipify.org?format=json", timeout=5)
-        response.raise_for_status()
-        data = response.json()
-        return data.get('ip', 'N/A')
-    except requests.RequestException as e:
-        print(f"Warning: Failed to get external IP from ipify.org: {e}")
-        return "N/A"
-    except json.JSONDecodeError as e:
-        print(f"Warning: Failed to decode JSON from ipify.org: {e}")
-        return "N/A"
-
-# --- ПЕРЕИМЕНОВАНА и ИЗМЕНЕНА: Получение полных данных о геолокации ---
-def get_location_data_full(ip_address): # <--- Теперь принимает IP-адрес
-    """
-    Получает полные данные о местоположении для заданного IP-адреса,
-    пробуя несколько сервисов по очереди.
-    """
-    if ip_address == "N/A" or not ip_address:
-        raise ValueError("Cannot get full location data for 'N/A' or empty IP address.")
-
-    services = [
-        f"http://ip-api.com/json/{ip_address}?fields=status,message,countryCode,city,isp,query", # ПЕРВЫЙ ПРИОРИТЕТ, HTTP
-        f"https://ipinfo.io/{ip_address}/json" # ВТОРОЙ ПРИОРИТЕТ, HTTPS, без токена
-    ]
-
-    for url in services:
-        print(f"Attempting to get full data for {ip_address} from: {url}")
-        try:
-            response = requests.get(url, timeout=10)
-            response.raise_for_status()
-            data = response.json()
-            print(f"Successfully received full data from {url}: {data}")
-
-            if "ip-api.com" in url:
-                if data.get('status') == 'success':
-                    return {
-                        'ip': data.get('query', 'N/A'), 
-                        'country_code': data.get('countryCode', '').lower(), 
-                        'city': data.get('city', 'N/A'), 
-                        'isp': data.get('isp', 'N/A')
-                    }
-                else:
-                    print(f"Service {url} returned status: {data.get('status')} - {data.get('message')}")
-                    continue 
-            
-            elif "ipinfo.io" in url:
-                return {
-                    'ip': data.get('ip', 'N/A'),
-                    'country_code': data.get('country', '').lower(),
-                    'city': data.get('city', 'N/A'),
-                    'isp': data.get('org', 'N/A')
-                }
-
-        except requests.exceptions.RequestException as e:
-            print(f"Warning: Failed to get full data from {url}. Error: {e}")
-            continue
-        except json.JSONDecodeError as e:
-            print(f"Warning: Failed to decode JSON from {url}. Error: {e}")
-            continue
-
-    raise ConnectionError(f"All full IP data services are unavailable for IP: {ip_address}.")
+        result = subprocess.run([go_exe_path], capture_output=True, text=True, check=True, timeout=20)
+        json_output = result.stdout
+        return json.loads(json_output)
+    except subprocess.CalledProcessError as e:
+        print(f"Error running Go executable: {e.stderr}")
+        return None
+    except (json.JSONDecodeError, FileNotFoundError) as e:
+        print(f"Error parsing Go output or file not found: {e}")
+        return None
 
 def clean_isp_name(isp_name):
     """
@@ -273,12 +225,12 @@ class AboutDialog(QtWidgets.QDialog):
         super().__init__(parent)
         self.setWindowTitle(tr.get("about_dialog_title", app_name=APP_NAME))
         self.setWindowIcon(app_icon)
-        self.setMinimumWidth(350)
+        self.setFixedSize(465, 349)
         layout = QtWidgets.QVBoxLayout(self)
         title_label = QtWidgets.QLabel(f"<b>{APP_NAME}</b>")
         font = title_label.font(); font.setPointSize(14); title_label.setFont(font)
         title_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignHCenter)
-        release_date = "2025-07-11" # <--- ОБНОВЛЕНА ДАТА РЕЛИЗА
+        release_date = "2025-07-24" # <--- ОБНОВЛЕНА ДАТА РЕЛИЗА
         version_label = QtWidgets.QLabel(tr.get("about_version", version=version, release_date=release_date))
         version_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignHCenter)
         website_label = QtWidgets.QLabel(f'<a href="https://github.com/Ridbowt/TrayFlag">{tr.get("about_website")}</a>')
@@ -474,82 +426,56 @@ class TrayFlag(QtWidgets.QSystemTrayIcon):
             self.reset_to_active_mode() 
 
         try:
-            current_external_ip = get_current_external_ip()
+            ip_data = get_ip_data_from_go()
             
-            # ИЗМЕНЕНИЕ В update_location_icon: ОБНОВЛЕНИЕ ЛОГИКИ ОБРАБОТКИ IP И GUI
-            # Мы хотим обновить GUI, если IP изменился ИЛИ если он был N/A и стал реальным
-            # ИЛИ если это принудительное обновление.
-
-            # Флаг, указывающий, нужно ли обновить GUI и сбросить режим
             should_update_gui_and_reset = False
 
-            if current_external_ip == "N/A":
-                # Если IP не обнаружен, всегда показываем иконку "нет интернета"
+            if not ip_data or ip_data.get('ip') == "N/A":
                 self.setIcon(self.app_icon or self.no_internet_icon)
                 self.setToolTip(self.tr.get("error_tooltip", error=self.tr.get("no_external_ip_detected")))
                 
-                # Если последний известный IP был реальным, а теперь N/A, это считается изменением
                 if self.last_known_external_ip != "N/A":
                     should_update_gui_and_reset = True
-                    # ДОБАВЛЕНО: Уведомление и звук при потере сети
                     if self.notifications_enabled:
                         self.showMessage(self.tr.get("network_lost_title"), self.tr.get("network_lost_message"), self.icon(), 5000)
                         self.play_alert_sound_threaded()
                 
-                # Обновляем last_known_external_ip на N/A, чтобы отслеживать переход
-                self.last_known_external_ip = "N/A" 
+                self.last_known_external_ip = "N/A"
 
-            else: # current_external_ip НЕ "N/A" (получен реальный IP)
-                # Если IP изменился (включая переход из N/A в реальный)
+            else: 
+                current_external_ip = ip_data.get('ip')
+                full_data = ip_data.get('full_data', {})
+                
                 if current_external_ip != self.last_known_external_ip:
                     should_update_gui_and_reset = True
                 
-                # Если это принудительное обновление, всегда обновляем GUI
                 if is_forced_by_user:
                     should_update_gui_and_reset = True
 
-                # Пытаемся получить полные данные
-                new_data = None
-                try:
-                    new_data = get_location_data_full(current_external_ip)
-                except (ConnectionError, ValueError) as e:
-                    # Если не удалось получить полные данные, но IP известен, используем частичные
-                    new_data = {'ip': current_external_ip, 'country_code': '??', 'city': 'N/A', 'isp': 'N/A'}
-                    print(f"Warning: Failed to get full data for {current_external_ip}: {e}")
-                
-                # Если данные получены (даже частичные)
-                if new_data and new_data.get('ip') != 'N/A':
-                    self.last_known_external_ip = new_data['ip'] # Обновляем последний известный IP
+                if full_data and full_data.get('ip') != 'N/A':
+                    self.last_known_external_ip = full_data['ip']
                     
-                    # Обновляем историю и текущие данные
                     if self.current_location_data:
                         self.location_history.append(self.current_location_data)
-                    self.current_location_data = new_data
+                    self.current_location_data = full_data
                     
-                    # Если нужно обновить GUI (IP изменился или принудительное обновление)
                     if should_update_gui_and_reset:
                         self.update_gui_with_new_data()
                 else:
-                    # Если даже после попытки получить полные данные, ничего не вышло (очень редкий случай)
-                    self.setIcon(self.app_icon or self.no_internet_icon)
-                    self.setToolTip(self.tr.get("error_tooltip", error=self.tr.get("could_not_get_any_ip_data")))
-                    should_update_gui_and_reset = True # Считаем это изменением, чтобы сбросить таймер
-
-            # В конце, если нужно обновить GUI и сбросить режим, делаем это
+                    self.current_location_data = {'ip': current_external_ip, 'country_code': '??', 'city': 'N/A', 'isp': 'N/A'}
+                    self.last_known_external_ip = current_external_ip
+                    if should_update_gui_and_reset:
+                        self.update_gui_with_new_data()
+            
             if should_update_gui_and_reset:
-                self.reset_to_active_mode() # Всегда сбрасываем в активный режим (который теперь единственный)
+                self.reset_to_active_mode()
             else:
-                # Если IP не изменился и не было принудительного обновления,
-                # просто планируем следующее обновление (таймер всегда в активном режиме)
                 self.schedule_next_update()
 
-
         except Exception as e:
-            # Обработка любых непредвиденных ошибок
             self.setIcon(self.app_icon or self.no_internet_icon)
             self.setToolTip(self.tr.get("error_tooltip", error=self.tr.get("unexpected_error_occurred", error_msg=str(e))))
             print(f"CRITICAL ERROR in update_location_icon: {e}")
-            # В случае критической ошибки, всегда сбрасываем в активный режим
             self.reset_to_active_mode()
 
     def update_gui_with_new_data(self):
