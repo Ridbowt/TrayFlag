@@ -50,5 +50,7 @@
     "could_not_get_any_ip_data": "Не удалось получить никаких данных об IP.",
     "unexpected_error_occurred": "Произошла непредвиденная ошибка: {error_msg}",
     "network_lost_title": "Сеть потеряна!",
-    "network_lost_message": "Внешний IP не обнаружен. Проверьте подключение к интернету."
+    "network_lost_message": "Внешний IP не обнаружен. Проверьте подключение к интернету.",
+    "button_ok": "ОК",
+    "button_cancel": "Отмена"
 }

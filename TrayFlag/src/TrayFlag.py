@@ -15,7 +15,7 @@ import threading
 # =============================================================================
 #  Глобальные переменные и константы
 # =============================================================================
-__version__ = "1.5.0" # <--- ВЕРСИЯ ОБНОВЛЕНА
+__version__ = "1.5.1" # <--- ВЕРСИЯ ОБНОВЛЕНА
 APP_NAME = "TrayFlag"
 ORG_NAME = "YourCompany" # <--- Имя вашей организации, можно любое
 
@@ -46,8 +46,8 @@ def get_base_path():
         # os.path.abspath(__file__) дает полный путь к текущему скрипту (TrayFlag.py).
         # os.path.dirname(...) вернет путь к папке, где лежит скрипт (например, src).
         # Пример: F:\Scripts\Python\TrayFlag\src
-        # return os.path.abspath(os.path.join(os.path.dirname(__file__), '..')) # <--- ПРИ ЗАПУСКЕ .PY СКРИПТА
-        return os.path.dirname(os.path.abspath(__file__)) # <--- ПРИ ЗАПУСКЕ .EXE ПРИЛОЖЕНИЯ
+        ### return os.path.abspath(os.path.join(os.path.dirname(__file__), '..')) # <--- ПРИ ЗАПУСКЕ ИЗ .PY СКРИПТА
+        return os.path.dirname(os.path.abspath(__file__)) # <--- ПРИ ЗАПУСКЕ ИЗ .EXE ПРИЛОЖЕНИЯ
 def resource_path(relative_path):
     """
     Возвращает полный путь к файлу ресурсов.
@@ -221,33 +221,45 @@ class Translator:
         
 # <--- Изменения в AboutDialog (release_date)
 class AboutDialog(QtWidgets.QDialog):
+    # --- НАЧАЛО КОДА ДЛЯ ЗАМЕНЫ ---
+    # --- НАЧАЛО КОДА ДЛЯ ЗАМЕНЫ ---
     def __init__(self, version, app_icon, tr, parent=None):
         super().__init__(parent)
-        self.setWindowTitle(tr.get("about_dialog_title", app_name=APP_NAME))
+        
+        # --- ИСПРАВЛЕНИЕ: Явно сохраняем объект переводчика ---
+        self.tr = tr
+        
+        self.setWindowTitle(self.tr.get("about_dialog_title", app_name=APP_NAME))
         self.setWindowIcon(app_icon)
         self.setFixedSize(465, 349)
         layout = QtWidgets.QVBoxLayout(self)
+        
         title_label = QtWidgets.QLabel(f"<b>{APP_NAME}</b>")
-        font = title_label.font(); font.setPointSize(14); title_label.setFont(font)
+        font = title_label.font()
+        font.setPointSize(14)
+        title_label.setFont(font)
         title_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignHCenter)
-        release_date = "2025-07-24" # <--- ОБНОВЛЕНА ДАТА РЕЛИЗА
-        version_label = QtWidgets.QLabel(tr.get("about_version", version=version, release_date=release_date))
+        
+        release_date = "2025-07-25"
+        version_label = QtWidgets.QLabel(self.tr.get("about_version", version=version, release_date=release_date))
         version_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignHCenter)
-        website_label = QtWidgets.QLabel(f'<a href="https://github.com/Ridbowt/TrayFlag">{tr.get("about_website")}</a>')
+        
+        website_label = QtWidgets.QLabel(f'<a href="https://github.com/Ridbowt/TrayFlag">{self.tr.get("about_website")}</a>')
         website_label.setOpenExternalLinks(True)
         website_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignHCenter)
-        acknowledgements_box = QtWidgets.QGroupBox(tr.get("about_acknowledgements"))
+        
+        acknowledgements_box = QtWidgets.QGroupBox(self.tr.get("about_acknowledgements"))
         ack_layout = QtWidgets.QVBoxLayout()
         ack_html = (
             f"<style>ul {{ list-style-type: none; padding-left: 0; margin-left: 0; }} li {{ margin-bottom: 5px; }}</style>"
             f"<ul>"
-            f"{tr.get('ack_ip_services')}"
-            f"{tr.get('ack_flags')}"
-            f"{tr.get('ack_app_icon')}"
-            f"{tr.get('ack_logo_builder')}"
-            f"{tr.get('ack_sound')}"
-            f"{tr.get('ack_code')}"
-            f"{tr.get('ack_ai')}"
+            f"{self.tr.get('ack_ip_services')}"
+            f"{self.tr.get('ack_flags')}"
+            f"{self.tr.get('ack_app_icon')}"
+            f"{self.tr.get('ack_logo_builder')}"
+            f"{self.tr.get('ack_sound')}"
+            f"{self.tr.get('ack_code')}"
+            f"{self.tr.get('ack_ai')}"
             f"</ul>"
         )
         ack_label = QtWidgets.QLabel(ack_html)
@@ -255,11 +267,42 @@ class AboutDialog(QtWidgets.QDialog):
         ack_label.setWordWrap(True)
         ack_layout.addWidget(ack_label)
         acknowledgements_box.setLayout(ack_layout)
-        button_box = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.StandardButton.Ok)
+        
+        button_box = QtWidgets.QDialogButtonBox()
+        
+        # Создаем кастомную кнопку с нашим переводом
+        ok_button = button_box.addButton(self.tr.get("button_ok"), QtWidgets.QDialogButtonBox.ButtonRole.AcceptRole)
+
+        # Устанавливаем стили для кнопки OK
+        ok_color = "#4488AA"
+        
+        ok_button.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {ok_color};
+                color: white;
+                border: 1px solid #337799;
+                padding: 5px 15px;
+                border-radius: 3px;
+                font-weight: bold;
+            }}
+            QPushButton:hover {{
+                background-color: #5599bb;
+            }}
+            QPushButton:pressed {{
+                background-color: #337799;
+            }}
+        """)
+        
         button_box.accepted.connect(self.accept)
-        layout.addWidget(title_label); layout.addWidget(version_label); layout.addWidget(website_label)
-        layout.addSpacing(15); layout.addWidget(acknowledgements_box); layout.addStretch()
+
+        layout.addWidget(title_label)
+        layout.addWidget(version_label)
+        layout.addWidget(website_label)
+        layout.addSpacing(15)
+        layout.addWidget(acknowledgements_box)
+        layout.addStretch()
         layout.addWidget(button_box)
+    # --- КОНЕЦ КОДА ДЛЯ ЗАМЕНЫ ---
 
 class SettingsDialog(QtWidgets.QDialog):
     def __init__(self, app_icon, tr, available_langs, current_lang, parent=None):
@@ -294,7 +337,57 @@ class SettingsDialog(QtWidgets.QDialog):
         self.sound_checkbox = QtWidgets.QCheckBox(tr.get("settings_sound"))
         form_layout.addRow(self.sound_checkbox)
         layout.addLayout(form_layout)
-        button_box = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.StandardButton.Ok | QtWidgets.QDialogButtonBox.StandardButton.Cancel)
+        button_box = QtWidgets.QDialogButtonBox()
+
+        # --- НАЧАЛО НОВОГО КОДА ---
+
+        # --- ИЗМЕНЕНИЕ: Создаем кастомные кнопки с нашим переводом ---
+        # Создаем кнопки с текстом из нашего .json файла
+        ok_button = button_box.addButton(self.tr.get("button_ok"), QtWidgets.QDialogButtonBox.ButtonRole.AcceptRole)
+        cancel_button = button_box.addButton(self.tr.get("button_cancel"), QtWidgets.QDialogButtonBox.ButtonRole.RejectRole)
+
+        # Устанавливаем стили для кнопок
+        # Мы используем f-строки для удобства вставки HEX-кодов
+        ok_color = "#3399FF"
+        cancel_color = "#777777"
+        
+        # Стиль для кнопки OK
+        ok_button.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {ok_color};
+                color: white;
+                border: 1px solid #555;
+                padding: 5px 15px;
+                border-radius: 3px;
+                font-weight: bold;
+            }}
+            QPushButton:hover {{
+                background-color: #44aaff;
+            }}
+            QPushButton:pressed {{
+                background-color: #2288ee;
+            }}
+        """)
+
+        # Стиль для кнопки Cancel
+        cancel_button.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {cancel_color};
+                color: white;
+                border: 1px solid #555;
+                padding: 5px 15px;
+                border-radius: 3px;
+            }}
+            QPushButton:hover {{
+                background-color: #888888;
+            }}
+            QPushButton:pressed {{
+                background-color: #666666;
+            }}
+        """)
+        
+        # --- КОНЕЦ НОВОГО КОДА ---
+
         button_box.accepted.connect(self.accept)
         button_box.rejected.connect(self.reject)
         layout.addWidget(button_box)

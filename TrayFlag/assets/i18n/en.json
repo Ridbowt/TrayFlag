@@ -50,5 +50,7 @@
     "could_not_get_any_ip_data": "Could not get any IP data.",
     "unexpected_error_occurred": "An unexpected error occurred: {error_msg}",
     "network_lost_title": "Network Lost!",
-    "network_lost_message": "No external IP detected. Check your internet connection."
+    "network_lost_message": "No external IP detected. Check your internet connection.",
+    "button_ok": "OK",
+    "button_cancel": "Cancel"
 }
