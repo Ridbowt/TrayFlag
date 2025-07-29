@@ -15,7 +15,7 @@ import threading
 # =============================================================================
 #  Глобальные переменные и константы
 # =============================================================================
-__version__ = "1.5.1" # <--- ВЕРСИЯ ОБНОВЛЕНА
+__version__ = "1.5.2" # <--- ВЕРСИЯ ОБНОВЛЕНА
 APP_NAME = "TrayFlag"
 ORG_NAME = "YourCompany" # <--- Имя вашей организации, можно любое
 
@@ -46,8 +46,8 @@ def get_base_path():
         # os.path.abspath(__file__) дает полный путь к текущему скрипту (TrayFlag.py).
         # os.path.dirname(...) вернет путь к папке, где лежит скрипт (например, src).
         # Пример: F:\Scripts\Python\TrayFlag\src
-        ### return os.path.abspath(os.path.join(os.path.dirname(__file__), '..')) # <--- ПРИ ЗАПУСКЕ ИЗ .PY СКРИПТА
-        return os.path.dirname(os.path.abspath(__file__)) # <--- ПРИ ЗАПУСКЕ ИЗ .EXE ПРИЛОЖЕНИЯ
+        return os.path.abspath(os.path.join(os.path.dirname(__file__), '..')) # <--- ПРИ ЗАПУСКЕ ИЗ .PY СКРИПТА
+        # return os.path.dirname(os.path.abspath(__file__)) # <--- ПРИ ЗАПУСКЕ ИЗ .EXE ПРИЛОЖЕНИЯ
 def resource_path(relative_path):
     """
     Возвращает полный путь к файлу ресурсов.
@@ -223,24 +223,39 @@ class Translator:
 class AboutDialog(QtWidgets.QDialog):
     # --- НАЧАЛО КОДА ДЛЯ ЗАМЕНЫ ---
     # --- НАЧАЛО КОДА ДЛЯ ЗАМЕНЫ ---
+        # --- НАЧАЛО КОДА ДЛЯ ЗАМЕНЫ ---
     def __init__(self, version, app_icon, tr, parent=None):
         super().__init__(parent)
         
-        # --- ИСПРАВЛЕНИЕ: Явно сохраняем объект переводчика ---
         self.tr = tr
         
         self.setWindowTitle(self.tr.get("about_dialog_title", app_name=APP_NAME))
         self.setWindowIcon(app_icon)
-        self.setFixedSize(465, 349)
-        layout = QtWidgets.QVBoxLayout(self)
+        self.setFixedSize(605, 371)
         
+        # --- НОВЫЙ КОД: Создаем главную горизонтальную компоновку ---
+        main_layout = QtWidgets.QHBoxLayout(self)
+        
+        # --- НОВЫЙ КОД: Левая часть (Логотип) ---
+        logo_label = QtWidgets.QLabel()
+        pixmap = QtGui.QPixmap(resource_path(os.path.join("assets", "icons", "about_logo.png")))
+        # Масштабируем логотип до приемлемого размера, например, 64x64
+        logo_label.setPixmap(pixmap.scaled(96, 96, QtCore.Qt.AspectRatioMode.KeepAspectRatio, QtCore.Qt.TransformationMode.SmoothTransformation))
+        logo_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop | QtCore.Qt.AlignmentFlag.AlignHCenter)
+        logo_label.setContentsMargins(10, 10, 10, 10) # Добавляем отступы
+        
+        # --- НОВЫЙ КОД: Правая часть (Вся текстовая информация) ---
+        right_widget = QtWidgets.QWidget()
+        right_layout = QtWidgets.QVBoxLayout(right_widget)
+        
+        # --- Старый код, который теперь добавляется в правую компоновку ---
         title_label = QtWidgets.QLabel(f"<b>{APP_NAME}</b>")
         font = title_label.font()
         font.setPointSize(14)
         title_label.setFont(font)
         title_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignHCenter)
         
-        release_date = "2025-07-25"
+        release_date = "2025-07-29"
         version_label = QtWidgets.QLabel(self.tr.get("about_version", version=version, release_date=release_date))
         version_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignHCenter)
         
@@ -248,7 +263,7 @@ class AboutDialog(QtWidgets.QDialog):
         website_label.setOpenExternalLinks(True)
         website_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignHCenter)
         
-        acknowledgements_box = QtWidgets.QGroupBox(self.tr.get("about_acknowledgements"))
+        acknowledgements_box = QtWidgets.QGroupBox(self.tr.get("about_acknowledgements"))        
         ack_layout = QtWidgets.QVBoxLayout()
         ack_html = (
             f"<style>ul {{ list-style-type: none; padding-left: 0; margin-left: 0; }} li {{ margin-bottom: 5px; }}</style>"
@@ -269,39 +284,30 @@ class AboutDialog(QtWidgets.QDialog):
         acknowledgements_box.setLayout(ack_layout)
         
         button_box = QtWidgets.QDialogButtonBox()
-        
-        # Создаем кастомную кнопку с нашим переводом
         ok_button = button_box.addButton(self.tr.get("button_ok"), QtWidgets.QDialogButtonBox.ButtonRole.AcceptRole)
-
-        # Устанавливаем стили для кнопки OK
         ok_color = "#4488AA"
-        
         ok_button.setStyleSheet(f"""
             QPushButton {{
-                background-color: {ok_color};
-                color: white;
-                border: 1px solid #337799;
-                padding: 5px 15px;
-                border-radius: 3px;
-                font-weight: bold;
+                background-color: {ok_color}; color: white; border: 1px solid #337799;
+                padding: 5px 15px; border-radius: 3px; font-weight: bold;
             }}
-            QPushButton:hover {{
-                background-color: #5599bb;
-            }}
-            QPushButton:pressed {{
-                background-color: #337799;
-            }}
+            QPushButton:hover {{ background-color: #5599bb; }}
+            QPushButton:pressed {{ background-color: #337799; }}
         """)
-        
         button_box.accepted.connect(self.accept)
 
-        layout.addWidget(title_label)
-        layout.addWidget(version_label)
-        layout.addWidget(website_label)
-        layout.addSpacing(15)
-        layout.addWidget(acknowledgements_box)
-        layout.addStretch()
-        layout.addWidget(button_box)
+        # Добавляем все текстовые виджеты в правую компоновку
+        right_layout.addWidget(title_label)
+        right_layout.addWidget(version_label)
+        right_layout.addWidget(website_label)
+        right_layout.addSpacing(15)
+        right_layout.addWidget(acknowledgements_box)
+        right_layout.addStretch()
+        right_layout.addWidget(button_box)
+        
+        # --- НОВЫЙ КОД: Добавляем левую и правую части в главную компоновку ---
+        main_layout.addWidget(logo_label)
+        main_layout.addWidget(right_widget)
     # --- КОНЕЦ КОДА ДЛЯ ЗАМЕНЫ ---
 
 class SettingsDialog(QtWidgets.QDialog):
@@ -601,6 +607,7 @@ class TrayFlag(QtWidgets.QSystemTrayIcon):
             print(f"Error loading sound file: {e}"); return None, None
 
     def play_notification_sound_threaded(self):
+        if not self.sound_enabled: return
         if not sound_libs_available or self.sound_samples is None: return
         def sound_playback_task():
             try:
@@ -611,6 +618,7 @@ class TrayFlag(QtWidgets.QSystemTrayIcon):
 
     # ДОБАВЛЕНО: Новый метод для проигрывания аварийного звука
     def play_alert_sound_threaded(self):
+        if not self.sound_enabled: return
         if not sound_libs_available or self.alert_sound_samples is None: return
         def sound_playback_task():
             try:
