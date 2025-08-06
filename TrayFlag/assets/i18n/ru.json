@@ -28,7 +28,7 @@
     "about_acknowledgements": "Благодарности и ресурсы",
     "ack_ip_services": "<li><b>Сервисы геолокации IP:</b> <a href=\"https://www.ipify.org/\">ipify.org</a>, <a href=\"https://ip-api.com/\">ip-api.com</a>, <a href=\"https://ipinfo.io/\">ipinfo.io</a>, <a href=\"https://www.ip-tracker.org/\">ip-tracker.org</a></li>",
     "ack_flags": "<li><b>Иконки флагов:</b> <a href=\"https://github.com/lipis/flag-icons\">lipis/flag-icons</a></li>",
-    "ack_app_icon": "<li><b>Иконка приложения:</b> от <a href=\"https://www.freepik.com\">Freepik</a> с <a href=\"https://www.flaticon.com/free-icon/place_449970\">Flaticon</a></li>",
+    "ack_app_icon": "<li><b>Иконки приложения:</b> от <a href=\"https://www.freepik.com\">Freepik</a> с <a href=\"https://www.flaticon.com/free-icon/place_449970\">Flaticon</a>; </b> от <a href=\"https://www.flaticon.com/authors/vectors-market\">Vectors Market</a> с <a href=\"https://www.flaticon.com/free-icon/moon_740878\">Flaticon</a></li>",
     "ack_logo_builder": "<li><b>Сборка логотипа:</b> <a href=\"https://favicon.io/\">favicon.io</a></li>",
     "ack_sound": "<li><b>Звуки:</b> <a href=\"https://pixabay.com/users/universfield-28281460/\">pixabay.com</a> (Universfield - Error 08, New notification 09)</li>",
     "ack_code": "<li><b>Идеи и код:</b> <a href=\"https://stackoverflow.com/a/46595209\">Stack Overflow</a></li>",
@@ -52,5 +52,12 @@
     "network_lost_title": "Сеть потеряна!",
     "network_lost_message": "Внешний IP не обнаружен. Проверьте подключение к интернету.",
     "button_ok": "ОК",
-    "button_cancel": "Отмена"
+    "button_cancel": "Отмена",
+    
+    "settings_tab_general": "Основные",
+    "settings_tab_idle": "Экономный режим",
+    "settings_idle_enable": "Включать экономный режим в простое",
+    "settings_idle_threshold": "Переходить в экономный режим через:",
+    "settings_idle_interval": "Интервал обновления в простое:",
+    "minutes": "мин"
 }

@@ -28,7 +28,7 @@
     "about_acknowledgements": "Acknowledgements & Resources",
     "ack_ip_services": "<li><b>IP Geolocation Services:</b> <a href=\"https://www.ipify.org/\">ipify.org</a>, <a href=\"https://ip-api.com/\">ip-api.com</a>, <a href=\"https://ipinfo.io/\">ipinfo.io</a>, <a href=\"https://www.ip-tracker.org/\">ip-tracker.org</a></li>",
     "ack_flags": "<li><b>Country Flags:</b> <a href=\"https://github.com/lipis/flag-icons\">lipis/flag-icons</a></li>",
-    "ack_app_icon": "<li><b>App Icon:</b> by <a href=\"https://www.freepik.com\">Freepik</a> from <a href=\"https://www.flaticon.com/free-icon/place_449970\">Flaticon</a></li>",
+    "ack_app_icon": "<li><b>App Icons:</b> by <a href=\"https://www.freepik.com\">Freepik</a> from <a href=\"https://www.flaticon.com/free-icon/place_449970\">Flaticon</a>; </b> by <a href=\"https://www.flaticon.com/authors/vectors-market\">Vectors Market</a> from <a href=\"https://www.flaticon.com/free-icon/moon_740878\">Flaticon</a></li>",
     "ack_logo_builder": "<li><b>Logo Builder:</b> <a href=\"https://favicon.io/\">favicon.io</a></li>",
     "ack_sound": "<li><b>Sounds:</b> <a href=\"https://pixabay.com/users/universfield-28281460/\">pixabay.com</a> (Universfield - Error 08, New notification 09)</li>",
     "ack_code": "<li><b>Code & Ideas:</b> <a href=\"https://stackoverflow.com/a/46595209\">Stack Overflow</a></li>",
@@ -52,5 +52,12 @@
     "network_lost_title": "Network Lost!",
     "network_lost_message": "No external IP detected. Check your internet connection.",
     "button_ok": "OK",
-    "button_cancel": "Cancel"
+    "button_cancel": "Cancel",
+
+    "settings_tab_general": "General",
+    "settings_tab_idle": "Idle Mode",
+    "settings_idle_enable": "Enable Idle Mode",
+    "settings_idle_threshold": "Enter idle mode after:",
+    "settings_idle_interval": "Update interval in idle mode:",
+    "minutes": "min"
 }
