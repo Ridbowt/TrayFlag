@@ -14,7 +14,7 @@ def get_base_path():
         # sys.executable указывает на сам исполняемый файл (например, TrayFlag.exe).
         # os.path.dirname(sys.executable) вернет путь к папке, где лежит .exe.
         # Пример: F:\Scripts\Python\TrayFlag\dist\TrayFlag.dist
-        return os.path.dirname(sys.executable)
+        return os.path.dirname(sys.executable)        
     else:
         # Для запуска .py скрипта:
         # os.path.abspath(__file__) дает полный путь к текущему скрипту (TrayFlag.py).

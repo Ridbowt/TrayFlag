@@ -2,11 +2,14 @@
 import os
 from PyQt6 import QtWidgets, QtGui, QtCore
 from utils import resource_path
-from constants import APP_NAME # <-- ИЗМЕНЕНО
+from constants import APP_NAME
+import themes
 
 class AboutDialog(QtWidgets.QDialog):
     def __init__(self, app_icon, tr, version, release_date, parent=None):
         super().__init__(parent)
+        self.setObjectName("aboutDialog") # 1. Даем окну уникальное имя
+        self.setStyleSheet(themes.get_about_dialog_style()) # 2. Применяем стиль
         self.tr = tr
         self.setWindowTitle(self.tr.get("about_dialog_title", app_name=APP_NAME))
         self.setWindowIcon(app_icon)
@@ -69,7 +72,6 @@ class SettingsDialog(QtWidgets.QDialog):
         self.tr = tr
         self.setWindowTitle(tr.get("settings_dialog_title", app_name=APP_NAME))
         self.setWindowIcon(app_icon)
-        self.setModal(True)
         
         layout = QtWidgets.QVBoxLayout(self)
         tabs = QtWidgets.QTabWidget()

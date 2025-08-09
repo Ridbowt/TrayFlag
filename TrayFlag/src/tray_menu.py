@@ -17,6 +17,10 @@ class TrayMenuManager:
         self.isp_action = QtGui.QAction(self.tr.get("menu_isp_wait")); self.isp_action.setEnabled(False)
         self.copy_ip_action = QtGui.QAction(self.tr.get("menu_copy_ip")); self.copy_ip_action.triggered.connect(self.app.copy_ip_to_clipboard); self.copy_ip_action.setEnabled(False)
         self.force_update_action = QtGui.QAction(self.tr.get("menu_update_now")); self.force_update_action.triggered.connect(lambda: self.app.update_location_icon(is_forced_by_user=True))
+
+        self.speedtest_action = QtGui.QAction(self.tr.get("menu_speedtest_browser"))
+        self.speedtest_action.triggered.connect(self.app.open_speedtest_website)
+
         self.weblink_action = QtGui.QAction(self.tr.get("menu_weblink")); self.weblink_action.triggered.connect(self.app.open_weblink); self.weblink_action.setEnabled(False)
         self.history_menu = QtWidgets.QMenu(self.tr.get("menu_history"))
         self.history_placeholder_action = QtGui.QAction(self.tr.get("menu_history_empty")); self.history_placeholder_action.setEnabled(False)
@@ -25,7 +29,7 @@ class TrayMenuManager:
         self.about_action = QtGui.QAction(self.tr.get("menu_about", app_name=APP_NAME)); self.about_action.triggered.connect(self.app.open_about_dialog)
         self.exit_action = QtGui.QAction(self.tr.get("menu_exit")); self.exit_action.triggered.connect(QtWidgets.QApplication.quit)
         
-        actions = [self.ip_action, self.city_action, self.isp_action, None, self.copy_ip_action, self.force_update_action, None, self.history_menu, self.weblink_action, None, self.settings_action, self.about_action, None, self.exit_action]
+        actions = [self.ip_action, self.city_action, self.isp_action, None, self.copy_ip_action, self.force_update_action, self.speedtest_action, None, self.history_menu, self.weblink_action, None, self.settings_action, self.about_action, None, self.exit_action]
         for action in actions:
             if action is None: self.menu.addSeparator()
             elif isinstance(action, QtWidgets.QMenu): self.menu.addMenu(action)
