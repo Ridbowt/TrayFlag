@@ -6,21 +6,25 @@ from constants import APP_NAME
 import themes
 
 class AboutDialog(QtWidgets.QDialog):
-    def __init__(self, app_icon, tr, version, release_date, parent=None):
+    def __init__(self, app_icon, tr, version, release_date, logo_pixmap, parent=None):
         super().__init__(parent)
-        self.setObjectName("aboutDialog") # 1. Даем окну уникальное имя
-        self.setStyleSheet(themes.get_about_dialog_style()) # 2. Применяем стиль
+        self.setStyleSheet(themes.get_about_dialog_style())
         self.tr = tr
+        
         self.setWindowTitle(self.tr.get("about_dialog_title", app_name=APP_NAME))
         self.setWindowIcon(app_icon)
-        self.setFixedSize(565, 378)
+        self.setFixedSize(633, 378)
 
         main_layout = QtWidgets.QHBoxLayout(self)
+        
+        # --- ИЗМЕНЕНИЕ ЗДЕСЬ ---
+        # Мы больше не грузим картинку, а просто используем ту, что нам передали
         logo_label = QtWidgets.QLabel()
-        pixmap = QtGui.QPixmap(resource_path(os.path.join("assets", "icons", "about_logo.png")))
-        logo_label.setPixmap(pixmap.scaled(96, 96, QtCore.Qt.AspectRatioMode.KeepAspectRatio, QtCore.Qt.TransformationMode.SmoothTransformation))
+        if logo_pixmap:
+            logo_label.setPixmap(logo_pixmap)
         logo_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop | QtCore.Qt.AlignmentFlag.AlignHCenter)
         logo_label.setContentsMargins(10, 10, 10, 10)
+        # --- КОНЕЦ ИЗМЕНЕНИЯ ---
         
         right_widget = QtWidgets.QWidget()
         right_layout = QtWidgets.QVBoxLayout(right_widget)
@@ -40,16 +44,9 @@ class AboutDialog(QtWidgets.QDialog):
         ack_layout = QtWidgets.QVBoxLayout()
         ack_layout.setContentsMargins(5, 10, 5, 5)
         ack_lines = [self.tr.get(f'ack_{key}') for key in ['ip_services', 'flags', 'app_icon', 'logo_builder', 'sound', 'code', 'ai']]
-        # --- НАЧАЛО ИЗМЕНЕНИЙ ---
-        # Оборачиваем каждую строку в <p> с CSS-стилем, который убирает отступы
-        # и задает плотную высоту строки (например, 120% от размера шрифта).
         styled_lines = [f"<p style='margin: 0; padding: 0; line-height: 120%;'>{line}</p>" for line in ack_lines]
-        
-        # Соединяем строки БЕЗ <br>, так как <p> сам создает перенос
         ack_html = "".join(styled_lines)
-        
         ack_label = QtWidgets.QLabel(ack_html)
-        # --- КОНЕЦ ИЗМЕНЕНИЙ ---
         ack_label.setTextFormat(QtCore.Qt.TextFormat.RichText)
         ack_label.setOpenExternalLinks(True)
         ack_label.setWordWrap(True)
