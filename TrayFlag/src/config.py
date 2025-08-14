@@ -1,6 +1,6 @@
 # File: src/config.py (ФИНАЛЬНАЯ ВЕРСИЯ С ПОЛНЫМ .INI)
 import os
-from PyQt6.QtCore import QSettings
+from PySide6.QtCore import QSettings
 from utils import resource_path
 from constants import APP_NAME, __version__
 

@@ -1,5 +1,5 @@
 # File: src/tray_menu.py
-from PyQt6 import QtWidgets, QtGui
+from PySide6 import QtWidgets, QtGui
 from functools import partial
 from utils import clean_isp_name
 from constants import APP_NAME # <-- ИЗМЕНЕНО

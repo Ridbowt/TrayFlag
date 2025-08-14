@@ -2,7 +2,7 @@
 import sys
 import os
 import re
-from PyQt6 import QtWidgets, QtGui, QtCore
+from PySide6 import QtWidgets, QtGui, QtCore
 from constants import APP_NAME # <-- ИЗМЕНЕНО
 
 def get_base_path():

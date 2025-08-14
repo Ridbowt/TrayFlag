@@ -1,6 +1,6 @@
 # File: src/dialogs.py
 import os
-from PyQt6 import QtWidgets, QtGui, QtCore
+from PySide6 import QtWidgets, QtGui, QtCore
 from utils import resource_path
 from constants import APP_NAME
 import themes

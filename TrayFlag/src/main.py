@@ -1,6 +1,6 @@
 # File: src/main.py
 import sys
-from PyQt6 import QtWidgets
+from PySide6 import QtWidgets
 from app import App
 from constants import APP_NAME, ORG_NAME
 import themes

@@ -6,7 +6,7 @@ import random
 import threading
 import webbrowser
 from collections import deque
-from PyQt6 import QtWidgets, QtGui, QtCore
+from PySide6 import QtWidgets, QtGui, QtCore
 
 from utils import resource_path, create_no_internet_icon, set_autostart_shortcut, truncate_text, clean_isp_name
 from config import ConfigManager
