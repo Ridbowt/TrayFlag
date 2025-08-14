@@ -9,19 +9,8 @@ def get_base_path():
     """
     Возвращает правильный базовый путь для .py и для скомпилированного .exe.
     """
-    if getattr(sys, 'frozen', False):
-        # Для скомпилированного приложения Nuitka:
-        # sys.executable указывает на сам исполняемый файл (например, TrayFlag.exe).
-        # os.path.dirname(sys.executable) вернет путь к папке, где лежит .exe.
-        # Пример: F:\Scripts\Python\TrayFlag\dist\TrayFlag.dist
-        return os.path.dirname(sys.executable)        
-    else:
-        # Для запуска .py скрипта:
-        # os.path.abspath(__file__) дает полный путь к текущему скрипту (TrayFlag.py).
-        # os.path.dirname(...) вернет путь к папке, где лежит скрипт (например, src).
-        # Пример: F:\Scripts\Python\TrayFlag\src
-        #return os.path.abspath(os.path.join(os.path.dirname(__file__), '..')) # <--- ПРИ ЗАПУСКЕ ИЗ .PY СКРИПТА
-        return os.path.dirname(os.path.abspath(__file__)) # <--- ПРИ ЗАПУСКЕ ИЗ .EXE ПРИЛОЖЕНИЯ
+    #return os.path.abspath(os.path.join(os.path.dirname(__file__), '..')) # <--- ПРИ ЗАПУСКЕ ИЗ .PY СКРИПТА
+    return os.path.dirname(os.path.abspath(__file__)) # <--- ПРИ ЗАПУСКЕ ИЗ .EXE ПРИЛОЖЕНИЯ
 
 def resource_path(relative_path):
     return os.path.join(get_base_path(), relative_path)

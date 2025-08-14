@@ -8,12 +8,13 @@ import themes
 class AboutDialog(QtWidgets.QDialog):
     def __init__(self, app_icon, tr, version, release_date, logo_pixmap, parent=None):
         super().__init__(parent)
+        self.setObjectName("aboutDialog")
         self.setStyleSheet(themes.get_about_dialog_style())
         self.tr = tr
         
         self.setWindowTitle(self.tr.get("about_dialog_title", app_name=APP_NAME))
         self.setWindowIcon(app_icon)
-        self.setFixedSize(633, 378)
+        self.setFixedSize(693, 406)
 
         main_layout = QtWidgets.QHBoxLayout(self)
         
@@ -40,18 +41,41 @@ class AboutDialog(QtWidgets.QDialog):
         website_label.setOpenExternalLinks(True)
         website_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignHCenter)
         
+        # ...
         acknowledgements_box = QtWidgets.QGroupBox(self.tr.get("about_acknowledgements"))
         ack_layout = QtWidgets.QVBoxLayout()
-        ack_layout.setContentsMargins(5, 10, 5, 5)
-        ack_lines = [self.tr.get(f'ack_{key}') for key in ['ip_services', 'flags', 'app_icon', 'logo_builder', 'sound', 'code', 'ai']]
-        styled_lines = [f"<p style='margin: 0; padding: 0; line-height: 120%;'>{line}</p>" for line in ack_lines]
-        ack_html = "".join(styled_lines)
-        ack_label = QtWidgets.QLabel(ack_html)
-        ack_label.setTextFormat(QtCore.Qt.TextFormat.RichText)
-        ack_label.setOpenExternalLinks(True)
-        ack_label.setWordWrap(True)
-        ack_layout.addWidget(ack_label)
+        ack_layout.setContentsMargins(5, 10, 5, 5) # Немного увеличим отступы для красоты
+        ack_layout.setSpacing(5) # Задаем расстояние между виджетами
+
+        # --- НАЧАЛО НОВОЙ ЛОГИКИ ---
+        
+        # Список ключей для благодарностей
+        ack_keys = ['ip_services', 'flags', 'app_icon', 'logo_builder', 'sound', 'code', 'ai']
+        
+        # Цвет для линии, такой же, как у рамки
+        line_color = "#606060"
+
+        for i, key in enumerate(ack_keys):
+            # Создаем QLabel для каждой строки благодарности
+            line_label = QtWidgets.QLabel(self.tr.get(f'ack_{key}'))
+            line_label.setTextFormat(QtCore.Qt.TextFormat.RichText)
+            line_label.setOpenExternalLinks(True)
+            line_label.setWordWrap(True)
+            ack_layout.addWidget(line_label)
+
+            # Добавляем линию-разделитель после каждого пункта, кроме последнего
+            if i < len(ack_keys) - 1:
+                line = QtWidgets.QFrame()
+                line.setFrameShape(QtWidgets.QFrame.Shape.HLine) # Горизонтальная линия
+                line.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
+                # Устанавливаем цвет линии
+                line.setStyleSheet(f"background-color: {line_color};")
+                line.setFixedHeight(1) # Высота в 1 пиксель
+                ack_layout.addWidget(line)
+
         acknowledgements_box.setLayout(ack_layout)
+        # --- КОНЕЦ НОВОЙ ЛОГИКИ ---
+        # ...
         
         button_box = QtWidgets.QDialogButtonBox()
         ok_button = button_box.addButton(self.tr.get("button_ok"), QtWidgets.QDialogButtonBox.ButtonRole.AcceptRole)
