@@ -14,68 +14,65 @@ class AboutDialog(QtWidgets.QDialog):
         
         self.setWindowTitle(self.tr.get("about_dialog_title", app_name=APP_NAME))
         self.setWindowIcon(app_icon)
-        self.setFixedSize(693, 406)
+        self.setFixedSize(610, 397)
 
-        main_layout = QtWidgets.QHBoxLayout(self)
+        layout = QtWidgets.QVBoxLayout(self)
         
-        # --- ИЗМЕНЕНИЕ ЗДЕСЬ ---
-        # Мы больше не грузим картинку, а просто используем ту, что нам передали
+        # --- НОВЫЙ БЛОК: Создаем "шапку" с горизонтальной компоновкой ---
+        header_widget = QtWidgets.QWidget()
+        header_layout = QtWidgets.QHBoxLayout(header_widget)
+        header_layout.setContentsMargins(0, 0, 0, 0) # Убираем лишние отступы
+
+        # Левая часть шапки: Логотип
         logo_label = QtWidgets.QLabel()
         if logo_pixmap:
             logo_label.setPixmap(logo_pixmap)
-        logo_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop | QtCore.Qt.AlignmentFlag.AlignHCenter)
-        logo_label.setContentsMargins(10, 10, 10, 10)
-        # --- КОНЕЦ ИЗМЕНЕНИЯ ---
-        
-        right_widget = QtWidgets.QWidget()
-        right_layout = QtWidgets.QVBoxLayout(right_widget)
-        
+        logo_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft | QtCore.Qt.AlignmentFlag.AlignVCenter)
+        logo_label.setContentsMargins(10, 0, 20, 0) # Отступы справа от лого
+
+        # Правая часть шапки: Название, версия, сайт
+        title_widget = QtWidgets.QWidget()
+        title_layout = QtWidgets.QVBoxLayout(title_widget)
+        title_layout.setContentsMargins(0, 0, 0, 0)
+        title_layout.setSpacing(2) # Уменьшаем расстояние между строками
+
         title_label = QtWidgets.QLabel(f"<b>{APP_NAME}</b>")
         font = title_label.font(); font.setPointSize(14); title_label.setFont(font)
-        title_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignHCenter)
         
         version_label = QtWidgets.QLabel(self.tr.get("about_version", version=version, release_date=release_date))
-        version_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignHCenter)
         
         website_label = QtWidgets.QLabel(f'<a href="https://github.com/Ridbowt/TrayFlag">{self.tr.get("about_website")}</a>')
         website_label.setOpenExternalLinks(True)
-        website_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignHCenter)
-        
-        # ...
+
+        title_layout.addWidget(title_label)
+        title_layout.addWidget(version_label)
+        title_layout.addWidget(website_label)
+        title_layout.addStretch() # Прижимает текст к верху
+
+        # Добавляем логотип и текст в шапку
+        header_layout.addWidget(logo_label)
+        header_layout.addWidget(title_widget)
+        # --- КОНЕЦ БЛОКА "ШАПКИ" ---
+
+        # --- Остальные виджеты (без изменений) ---
         acknowledgements_box = QtWidgets.QGroupBox(self.tr.get("about_acknowledgements"))
         ack_layout = QtWidgets.QVBoxLayout()
-        ack_layout.setContentsMargins(5, 10, 5, 5) # Немного увеличим отступы для красоты
-        ack_layout.setSpacing(5) # Задаем расстояние между виджетами
-
-        # --- НАЧАЛО НОВОЙ ЛОГИКИ ---
+        ack_layout.setContentsMargins(5, 10, 5, 5)
+        ack_layout.setSpacing(5)
         
-        # Список ключей для благодарностей
         ack_keys = ['ip_services', 'flags', 'app_icon', 'logo_builder', 'sound', 'code', 'ai']
-        
-        # Цвет для линии, такой же, как у рамки
         line_color = "#606060"
-
         for i, key in enumerate(ack_keys):
-            # Создаем QLabel для каждой строки благодарности
             line_label = QtWidgets.QLabel(self.tr.get(f'ack_{key}'))
             line_label.setTextFormat(QtCore.Qt.TextFormat.RichText)
             line_label.setOpenExternalLinks(True)
             line_label.setWordWrap(True)
             ack_layout.addWidget(line_label)
-
-            # Добавляем линию-разделитель после каждого пункта, кроме последнего
             if i < len(ack_keys) - 1:
-                line = QtWidgets.QFrame()
-                line.setFrameShape(QtWidgets.QFrame.Shape.HLine) # Горизонтальная линия
-                line.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
-                # Устанавливаем цвет линии
-                line.setStyleSheet(f"background-color: {line_color};")
-                line.setFixedHeight(1) # Высота в 1 пиксель
+                line = QtWidgets.QFrame(); line.setFrameShape(QtWidgets.QFrame.Shape.HLine)
+                line.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken); line.setStyleSheet(f"background-color: {line_color};"); line.setFixedHeight(1)
                 ack_layout.addWidget(line)
-
         acknowledgements_box.setLayout(ack_layout)
-        # --- КОНЕЦ НОВОЙ ЛОГИКИ ---
-        # ...
         
         button_box = QtWidgets.QDialogButtonBox()
         ok_button = button_box.addButton(self.tr.get("button_ok"), QtWidgets.QDialogButtonBox.ButtonRole.AcceptRole)
@@ -83,9 +80,12 @@ class AboutDialog(QtWidgets.QDialog):
         ok_button.setStyleSheet(f"QPushButton {{ background-color: {ok_color}; color: white; border: 1px solid #337799; padding: 5px 15px; border-radius: 3px; font-weight: bold; }} QPushButton:hover {{ background-color: #5599bb; }} QPushButton:pressed {{ background-color: #337799; }}")
         button_box.accepted.connect(self.accept)
 
-        right_layout.addWidget(title_label); right_layout.addWidget(version_label); right_layout.addWidget(website_label)
-        right_layout.addSpacing(15); right_layout.addWidget(acknowledgements_box); right_layout.addStretch(); right_layout.addWidget(button_box)
-        main_layout.addWidget(logo_label); main_layout.addWidget(right_widget)
+        # --- Добавляем все блоки в главную ВЕРТИКАЛЬНУЮ компоновку ---
+        layout.addWidget(header_widget)
+        layout.addWidget(acknowledgements_box)
+        layout.addStretch()
+        layout.addWidget(button_box)
+    # --- КОНЕЦ КОДА ДЛЯ ЗАМЕНЫ ---
 
 class SettingsDialog(QtWidgets.QDialog):
     def __init__(self, app_icon, tr, available_langs, current_config, parent=None):

@@ -322,3 +322,6 @@ class App(QtWidgets.QSystemTrayIcon):
     def open_speedtest_website(self):
         """Просто открывает сайт Speedtest.net в браузере по умолчанию."""
         webbrowser.open('https://www.speedtest.net')
+# В классе App
+    def open_dns_leak_test_website(self):
+        webbrowser.open('https://ipleak.net/')

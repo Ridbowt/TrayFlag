@@ -26,7 +26,7 @@
     "about_version": "Версия {version} ({release_date})",
     "about_website": "Сайт программы",
     "about_acknowledgements": "Благодарности и ресурсы",
-    "ack_ip_services": "<li><b>Сервисы геолокации IP:</b> <a href=\"https://www.ipify.org/\">ipify.org</a>, <a href=\"https://www.myip.com/\">myip.com</a>, <a href=\"https://ip-api.com/\">ip-api.com</a>, <a href=\"https://ipinfo.io/\">ipinfo.io</a>, <a href=\"https://www.ip-tracker.org/\">ip-tracker.org</a>, <a href=\"https://www.speedtest.net/\">speedtest.net</a></li>",
+    "ack_ip_services": "<li><b>Сервисы геолокации IP:</b> <a href=\"https://www.ipify.org/\">ipify.org</a>, <a href=\"https://www.myip.com/\">myip.com</a>, <a href=\"https://ip-api.com/\">ip-api.com</a>, <a href=\"https://ipinfo.io/\">ipinfo.io</a>, <a href=\"https://www.ip-tracker.org/\">ip-tracker.org</a>, <a href=\"https://www.speedtest.net/\">speedtest.net</a>, <a href=\"https://ipleak.net/\">ipleak.net</a></li>",
     "ack_flags": "<li><b>Иконки флагов:</b> <a href=\"https://github.com/lipis/flag-icons\">lipis/flag-icons</a></li>",
     "ack_app_icon": "<li><b>Иконки приложения:</b> от <a href=\"https://www.freepik.com\">Freepik</a> с <a href=\"https://www.flaticon.com/free-icon/place_449970\">Flaticon</a>; </b> от <a href=\"https://www.flaticon.com/authors/vectors-market\">Vectors Market</a> с <a href=\"https://www.flaticon.com/free-icon/moon_740878\">Flaticon</a></li>",
     "ack_logo_builder": "<li><b>Сборка логотипа:</b> <a href=\"https://favicon.io/\">favicon.io</a></li>",
@@ -63,6 +63,7 @@
     "tooltip_updated_at": "обн. в {time}",
 
     "menu_speedtest_browser": "🚀 Проверить скорость (в браузере)",
+    "menu_dns_leak_test": "🔍 Проверить утечку DNS",
 
     "settings_volume_level": "Громкость:",
     "volume_low": "Тихо",
