@@ -122,6 +122,37 @@ class SettingsDialog(QtWidgets.QDialog):
         self.notifications_checkbox = QtWidgets.QCheckBox(tr.get("settings_notifications")); self.notifications_checkbox.setChecked(current_config.notifications); general_layout.addRow(self.notifications_checkbox)
         self.sound_checkbox = QtWidgets.QCheckBox(tr.get("settings_sound")); self.sound_checkbox.setChecked(current_config.sound); general_layout.addRow(self.sound_checkbox)
 
+                # --- НАЧАЛО НОВОГО КОДА ---
+        # Создаем группу для радио-кнопок громкости
+        self.volume_groupbox = QtWidgets.QGroupBox(self.tr.get("settings_volume_level"))
+        volume_layout = QtWidgets.QHBoxLayout() # Горизонтальная компоновка
+        self.volume_groupbox.setLayout(volume_layout)
+
+        # Создаем сами радио-кнопки
+        self.volume_low_rb = QtWidgets.QRadioButton(self.tr.get("volume_low"))
+        self.volume_medium_rb = QtWidgets.QRadioButton(self.tr.get("volume_medium"))
+        self.volume_high_rb = QtWidgets.QRadioButton(self.tr.get("volume_high"))
+
+        # Добавляем их в компоновку
+        volume_layout.addWidget(self.volume_low_rb)
+        volume_layout.addWidget(self.volume_medium_rb)
+        volume_layout.addWidget(self.volume_high_rb)
+
+        # Устанавливаем текущее значение
+        if current_config.volume_level == "low":
+            self.volume_low_rb.setChecked(True)
+        elif current_config.volume_level == "high":
+            self.volume_high_rb.setChecked(True)
+        else: # medium по умолчанию
+            self.volume_medium_rb.setChecked(True)
+        
+        general_layout.addRow(self.volume_groupbox)
+
+        # Логика включения/выключения группы
+        self.sound_checkbox.toggled.connect(self.volume_groupbox.setEnabled)
+        self.volume_groupbox.setEnabled(current_config.sound)
+        # --- КОНЕЦ НОВОГО КОДА ---
+
         # --- Idle Mode Tab ---
         idle_layout = QtWidgets.QVBoxLayout(idle_tab)
         self.idle_enabled_checkbox = QtWidgets.QCheckBox(self.tr.get("settings_idle_enable")); self.idle_enabled_checkbox.setChecked(current_config.idle_enabled); idle_layout.addWidget(self.idle_enabled_checkbox)
@@ -149,9 +180,16 @@ class SettingsDialog(QtWidgets.QDialog):
         button_box.accepted.connect(self.accept); button_box.rejected.connect(self.reject); layout.addWidget(button_box)
 
     def get_settings(self):
+                # --- НАЧАЛО НОВОГО КОДА ---
+        volume_level = "medium"
+        if self.volume_low_rb.isChecked():
+            volume_level = "low"
+        elif self.volume_high_rb.isChecked():
+            volume_level = "high"
+        # --- КОНЕЦ НОВОГО КОДА ---
         return {
             'language': self.language_combo.currentData(), 'update_interval': self.update_interval_spinbox.value(),
             'autostart': self.autostart_checkbox.isChecked(), 'notifications': self.notifications_checkbox.isChecked(),
-            'sound': self.sound_checkbox.isChecked(), 'idle_enabled': self.idle_enabled_checkbox.isChecked(),
+            'sound': self.sound_checkbox.isChecked(), 'idle_enabled': self.idle_enabled_checkbox.isChecked(), 'volume_level': volume_level,
             'idle_threshold_mins': self.idle_threshold_spinbox.value(), 'idle_interval_mins': self.idle_interval_spinbox.value(),
         }

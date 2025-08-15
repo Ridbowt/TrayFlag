@@ -59,8 +59,8 @@ class App(QtWidgets.QSystemTrayIcon):
         # --- ДОБАВЛЕНО: Предварительная загрузка логотипа ---
         self.about_logo_pixmap = self._load_pixmap("about_logo.png", 96)
         
-        self.sound_samples, self.sound_samplerate = self._load_sound_file("notification.wav")
-        self.alert_sound_samples, self.alert_sound_samplerate = self._load_sound_file("alert.wav")
+        self.sound_samples, self.sound_samplerate = self._load_sound_file(f"notification_{self.volume_level}.wav")
+        self.alert_sound_samples, self.alert_sound_samplerate = self._load_sound_file(f"alert_{self.volume_level}.wav")
         
         self.menu_manager = TrayMenuManager(self)
         self.setContextMenu(self.menu_manager.menu)
@@ -81,6 +81,7 @@ class App(QtWidgets.QSystemTrayIcon):
         self.update_interval_ms = cfg.update_interval * 1000
         self.notifications_enabled = cfg.notifications
         self.sound_enabled = cfg.sound
+        self.volume_level = cfg.volume_level
         self.idle_enabled = cfg.idle_enabled
         self.idle_threshold_seconds = cfg.idle_threshold_mins * 60
         self.idle_interval_ms = cfg.idle_interval_mins * 60 * 1000
@@ -219,11 +220,21 @@ class App(QtWidgets.QSystemTrayIcon):
 
         self.settings_dialog = SettingsDialog(self.app_icon, self.tr, self.tr.available_languages, self.config, None)
         old_lang = self.config.language
-        if self.settings_dialog.exec():
-            new_settings = self.settings_dialog.get_settings()
+        dialog = SettingsDialog(self.app_icon, self.tr, self.tr.available_languages, self.config, None)
+        
+        old_lang = self.config.language
+        
+        # Теперь мы вызываем .exec() у правильной переменной 'dialog'
+        if dialog.exec():
+            new_settings = dialog.get_settings()
             self.config.save_settings(new_settings)
             set_autostart_shortcut(new_settings['autostart'])
             self.load_app_settings()
+            
+            # Перезагружаем звуки с новым уровнем громкости
+            self.sound_samples, self.sound_samplerate = self._load_sound_file(f"notification_{self.volume_level}.wav")
+            self.alert_sound_samples, self.alert_sound_samplerate = self._load_sound_file(f"alert_{self.volume_level}.wav")
+
             if old_lang != self.config.language:
                 self.reload_ui_texts()
 

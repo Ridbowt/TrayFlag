@@ -62,5 +62,10 @@
     "minutes": "min",
     "tooltip_updated_at": "upd. at {time}",
 
-    "menu_speedtest_browser": "🚀 Speedtest (in browser)"
+    "menu_speedtest_browser": "🚀 Speedtest (in browser)",
+
+    "settings_volume_level": "Volume:",
+    "volume_low": "Low",
+    "volume_medium": "Medium",
+    "volume_high": "High"
 }

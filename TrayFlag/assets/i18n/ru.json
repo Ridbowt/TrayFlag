@@ -62,5 +62,10 @@
     "minutes": "мин",          
     "tooltip_updated_at": "обн. в {time}",
 
-    "menu_speedtest_browser": "🚀 Проверить скорость (в браузере)"
+    "menu_speedtest_browser": "🚀 Проверить скорость (в браузере)",
+
+    "settings_volume_level": "Громкость:",
+    "volume_low": "Тихо",
+    "volume_medium": "Средне",
+    "volume_high": "Громко"
 }
