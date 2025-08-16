@@ -72,3 +72,101 @@ def get_about_dialog_style():
             padding: 0 3px 0 3px;
         }}
     """
+
+# --- ДОБАВЬТЕ ЭТОТ КОД В КОНЕЦ ФАЙЛА themes.py ---
+
+# Словарь с палитрами для кнопок. Все цвета хранятся здесь.
+BUTTON_PALETTES = {
+    "ok": {
+        "bg": "#3399FF",
+        "hover": "#44aaff",
+        "pressed": "#2288ee",
+        "border": "#555"
+    },
+    "cancel": {
+        "bg": "#777777",
+        "hover": "#888888",
+        "pressed": "#666666",
+        "border": "#555"
+    },
+    "info": {
+        "bg": "#4488AA",
+        "hover": "#5599bb",
+        "pressed": "#337799",
+        "border": "#337799"
+    }
+}
+
+def get_button_style(button_type):
+    """
+    Возвращает готовую строку stylesheet для кнопки.
+    button_type может быть 'ok', 'cancel', 'info'.
+    """
+    palette = BUTTON_PALETTES.get(button_type, BUTTON_PALETTES['cancel'])
+    
+    return f"""
+        QPushButton {{
+            background-color: {palette['bg']};
+            color: white;
+            border: 1px solid {palette['border']};
+            padding: 5px 15px;
+            border-radius: 3px;
+            font-weight: bold;
+        }}
+        QPushButton:hover {{
+            background-color: {palette['hover']};
+        }}
+        QPushButton:pressed {{
+            background-color: {palette['pressed']};
+        }}
+    """
+
+def get_settings_dialog_style():
+    """
+    Возвращает стиль для окна "Настройки".
+    """
+    dialog_bg_color = "#2D2D2D"
+    text_color = "#F0F0F0"
+    border_color = "#606060"
+
+    return f"""
+        /* Применяем стиль только к QDialog с objectName='settingsDialog' */
+        QDialog#settingsDialog {{
+            background-color: {dialog_bg_color};
+        }}
+        /* Стили для дочерних элементов */
+        QDialog#settingsDialog QWidget, /* Важно для вкладок */
+        QDialog#settingsDialog QLabel, 
+        QDialog#settingsDialog QGroupBox,
+        QDialog#settingsDialog QCheckBox,
+        QDialog#settingsDialog QRadioButton,
+        QDialog#settingsDialog QSpinBox,
+        QDialog#settingsDialog QComboBox {{
+            color: {text_color};
+            background-color: transparent;
+        }}
+        QDialog#settingsDialog QGroupBox {{
+            border: 1px solid {border_color};
+            border-radius: 5px;
+            margin-top: 0.5em;
+        }}
+        QDialog#settingsDialog QGroupBox::title {{
+            subcontrol-origin: margin;
+            left: 10px;
+            padding: 0 3px 0 3px;
+        }}
+        /* Стиль для вкладок */
+        QDialog#settingsDialog QTabBar::tab {{
+            color: {text_color};
+            background-color: #555555;
+            padding: 5px;
+            border-top-left-radius: 4px;
+            border-top-right-radius: 4px;
+        }}
+        QDialog#settingsDialog QTabBar::tab:selected {{
+            background-color: {dialog_bg_color};
+        }}
+        QDialog#settingsDialog QTabWidget::pane {{
+            border: 1px solid {border_color};
+        }}
+    """

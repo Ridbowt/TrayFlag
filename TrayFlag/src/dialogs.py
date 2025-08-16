@@ -74,11 +74,15 @@ class AboutDialog(QtWidgets.QDialog):
                 ack_layout.addWidget(line)
         acknowledgements_box.setLayout(ack_layout)
         
-        button_box = QtWidgets.QDialogButtonBox()
+        # --- НАЧАЛО ИЗМЕНЕННОГО БЛОКА ---
+        button_box = QtWidgets.QDialogButtonBox(self)
         ok_button = button_box.addButton(self.tr.get("button_ok"), QtWidgets.QDialogButtonBox.ButtonRole.AcceptRole)
-        ok_color = "#4488AA"
-        ok_button.setStyleSheet(f"QPushButton {{ background-color: {ok_color}; color: white; border: 1px solid #337799; padding: 5px 15px; border-radius: 3px; font-weight: bold; }} QPushButton:hover {{ background-color: #5599bb; }} QPushButton:pressed {{ background-color: #337799; }}")
+        
+        # Теперь стиль берется из нашего модуля themes
+        ok_button.setStyleSheet(themes.get_button_style("info"))
+        
         button_box.accepted.connect(self.accept)
+        # --- КОНЕЦ ИЗМЕНЕННОГО БЛОКА ---
 
         # --- Добавляем все блоки в главную ВЕРТИКАЛЬНУЮ компоновку ---
         layout.addWidget(header_widget)
@@ -90,6 +94,10 @@ class AboutDialog(QtWidgets.QDialog):
 class SettingsDialog(QtWidgets.QDialog):
     def __init__(self, app_icon, tr, available_langs, current_config, parent=None):
         super().__init__(parent)
+        # --- ДОБАВЬТЕ ЭТИ ДВЕ СТРОКИ ---
+#        self.setObjectName("settingsDialog")
+#        self.setStyleSheet(themes.get_settings_dialog_style())
+        # --- КОНЕЦ БЛОКА ---
         self.tr = tr
         self.setWindowTitle(tr.get("settings_dialog_title", app_name=APP_NAME))
         self.setWindowIcon(app_icon)
@@ -171,13 +179,86 @@ class SettingsDialog(QtWidgets.QDialog):
         self.idle_options_widget.setEnabled(current_config.idle_enabled)
 
         # --- Buttons ---
-        button_box = QtWidgets.QDialogButtonBox()
+        # --- НАЧАЛО ИЗМЕНЕННОГО БЛОКА ---
+        button_box = QtWidgets.QDialogButtonBox(self)
         ok_button = button_box.addButton(self.tr.get("button_ok"), QtWidgets.QDialogButtonBox.ButtonRole.AcceptRole)
         cancel_button = button_box.addButton(self.tr.get("button_cancel"), QtWidgets.QDialogButtonBox.ButtonRole.RejectRole)
-        ok_color = "#3399FF"; cancel_color = "#777777"
-        ok_button.setStyleSheet(f"QPushButton {{ background-color: {ok_color}; color: white; border: 1px solid #555; padding: 5px 15px; border-radius: 3px; font-weight: bold; }} QPushButton:hover {{ background-color: #44aaff; }} QPushButton:pressed {{ background-color: #2288ee; }}")
-        cancel_button.setStyleSheet(f"QPushButton {{ background-color: {cancel_color}; color: white; border: 1px solid #555; padding: 5px 15px; border-radius: 3px; }} QPushButton:hover {{ background-color: #888888; }} QPushButton:pressed {{ background-color: #666666; }}")
-        button_box.accepted.connect(self.accept); button_box.rejected.connect(self.reject); layout.addWidget(button_box)
+        
+        # Стили теперь берутся из модуля themes
+        ok_button.setStyleSheet(themes.get_button_style("ok"))
+        cancel_button.setStyleSheet(themes.get_button_style("cancel"))
+        
+        button_box.accepted.connect(self.accept)
+        button_box.rejected.connect(self.reject)
+        layout.addWidget(button_box)
+        # --- КОНЕЦ ИЗМЕНЕННОГО БЛОКА ---
+
+    def get_settings(self):
+        """Собирает все значения из виджетов и возвращает в виде словаря."""
+        volume_level = "medium"
+        if self.volume_low_rb.isChecked():
+            volume_level = "low"
+        elif self.volume_high_rb.isChecked():
+            volume_level = "high"
+
+        return {
+            'language': self.language_combo.currentData(),
+            'update_interval': self.update_interval_spinbox.value(),
+            'autostart': self.autostart_checkbox.isChecked(),
+            'notifications': self.notifications_checkbox.isChecked(),
+            'sound': self.sound_checkbox.isChecked(),
+            'volume_level': volume_level,
+            'idle_enabled': self.idle_enabled_checkbox.isChecked(),
+            'idle_threshold_mins': self.idle_threshold_spinbox.value(),
+            'idle_interval_mins': self.idle_interval_spinbox.value(),
+        }
+
+# File: src/dialogs.py
+
+# ... (импорты и класс AboutDialog, SettingsDialog) ...
+
+# --- ДОБАВЬТЕ ЭТОТ КЛАСС В КОНЕЦ ФАЙЛА ---
+class CustomQuestionDialog(QtWidgets.QDialog):
+    def __init__(self, title, text, tr, app_icon, parent=None):
+        super().__init__(parent)
+        self.tr = tr
+        self.setWindowTitle(title)
+        self.setWindowIcon(app_icon)
+        
+        # Применяем нашу темную тему
+        self.setObjectName("aboutDialog") # Используем тот же стиль, что и у "О программе"
+        self.setStyleSheet(themes.get_about_dialog_style())
+
+        layout = QtWidgets.QVBoxLayout(self)
+        layout.setSpacing(20)
+        layout.setContentsMargins(15, 15, 15, 15)
+
+        content_layout = QtWidgets.QHBoxLayout()
+        icon_label = QtWidgets.QLabel()
+        icon = self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MessageBoxQuestion)
+        icon_label.setPixmap(icon.pixmap(48, 48))
+        content_layout.addWidget(icon_label)
+        
+        text_label = QtWidgets.QLabel(text)
+        text_label.setWordWrap(True)
+        content_layout.addWidget(text_label, 1)
+        layout.addLayout(content_layout)
+
+        button_box = QtWidgets.QDialogButtonBox(self)
+        
+        yes_button = button_box.addButton(self.tr.get("button_yes"), QtWidgets.QDialogButtonBox.ButtonRole.YesRole)
+        no_button = button_box.addButton(self.tr.get("button_no"), QtWidgets.QDialogButtonBox.ButtonRole.NoRole)
+
+        yes_button.setStyleSheet(themes.get_button_style("ok"))
+        no_button.setStyleSheet(themes.get_button_style("cancel"))
+        
+        button_box.accepted.connect(self.accept)
+        button_box.rejected.connect(self.reject)
+        
+        button_layout = QtWidgets.QHBoxLayout()
+        button_layout.addStretch()
+        button_layout.addWidget(button_box)
+        layout.addLayout(button_layout)
 
     def get_settings(self):
                 # --- НАЧАЛО НОВОГО КОДА ---

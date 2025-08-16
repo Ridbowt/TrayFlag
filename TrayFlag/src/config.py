@@ -24,6 +24,9 @@ class ConfigManager:
         self.settings.setValue("main/autostart", False)
         self.settings.setValue("main/notifications", True)
         self.settings.setValue("main/sound", True)
+
+        self.settings.setValue("main/volume_level", "medium")
+        self.settings.setValue("main/shortcut_prompted", False)
         
         # Секция [intervals]
         self.settings.setValue("intervals/active", 7)
@@ -45,6 +48,7 @@ class ConfigManager:
         # но все равно оставляем значения по умолчанию на случай, если пользователь вручную удалит строку.
         self.language = self.settings.value("main/language", "", type=str)
         self.volume_level = self.settings.value("main/volume_level", "medium", type=str) # low, medium, high
+        self.shortcut_prompted = self.settings.value("main/shortcut_prompted", False, type=bool)
         self.autostart = self.settings.value("main/autostart", False, type=bool)
         self.notifications = self.settings.value("main/notifications", True, type=bool)
         self.sound = self.settings.value("main/sound", True, type=bool)

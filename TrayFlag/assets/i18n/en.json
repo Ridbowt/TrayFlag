@@ -68,5 +68,10 @@
     "settings_volume_level": "Volume:",
     "volume_low": "Low",
     "volume_medium": "Medium",
-    "volume_high": "High"
+    "volume_high": "High",
+
+    "shortcut_dialog_title": "Create Shortcut?",
+    "shortcut_dialog_text": "This is the first time you're running TrayFlag. Would you like to create a desktop shortcut for easy access?",
+    "button_yes": "Yes",
+    "button_no": "No"
 }

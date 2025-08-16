@@ -73,3 +73,42 @@ def create_no_internet_icon(size=20):
     painter.drawLine(size - 4, 3, 3, size - 4)
     painter.end()
     return QtGui.QIcon(pixmap)
+
+def create_desktop_shortcut():
+    """
+    Создает ярлык для приложения на рабочем столе, если его еще нет.
+    """
+    # Эта функция будет работать только на Windows
+    if sys.platform != 'win32':
+        return
+
+    try:
+        import win32com.client
+    except ImportError:
+        print("WARNING: pywin32 library not found. Desktop shortcut feature is disabled.")
+        return
+        
+    shell = win32com.client.Dispatch("WScript.Shell")
+    
+    # Получаем путь к рабочему столу текущего пользователя
+    desktop_folder = shell.SpecialFolders("Desktop")
+    shortcut_path = os.path.join(desktop_folder, f"{APP_NAME}.lnk")
+    
+    # Проверяем, не существует ли уже ярлык
+    if os.path.exists(shortcut_path):
+        print(f"Desktop shortcut already exists at: {shortcut_path}")
+        return
+
+    # Получаем путь к нашему скомпилированному .exe
+    main_exe_path = resource_path(f"{APP_NAME}.exe")
+    
+    # Создаем объект ярлыка и настраиваем его свойства
+    shortcut = shell.CreateShortCut(shortcut_path)
+    shortcut.TargetPath = main_exe_path
+    shortcut.IconLocation = resource_path(os.path.join("assets", "icons", "logo.ico"))
+    shortcut.Description = f"Launch {APP_NAME}"
+    shortcut.WorkingDirectory = get_base_path()
+    
+    # Сохраняем ярлык
+    shortcut.save()
+    print(f"Desktop shortcut created at: {shortcut_path}")

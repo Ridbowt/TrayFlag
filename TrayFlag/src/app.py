@@ -8,12 +8,12 @@ import webbrowser
 from collections import deque
 from PySide6 import QtWidgets, QtGui, QtCore
 
-from utils import resource_path, create_no_internet_icon, set_autostart_shortcut, truncate_text, clean_isp_name
-from config import ConfigManager
+from utils import resource_path, create_no_internet_icon, set_autostart_shortcut, truncate_text, clean_isp_name, create_desktop_shortcut 
+from config import ConfigManager, SETTINGS_FILE_PATH
 from constants import __version__, RELEASE_DATE
 from translator import Translator, get_initial_language_code
 from ip_fetcher import get_ip_data_from_go
-from dialogs import AboutDialog, SettingsDialog
+from dialogs import AboutDialog, SettingsDialog, CustomQuestionDialog
 from tray_menu import TrayMenuManager
 import idle_detector
 
@@ -39,7 +39,7 @@ class App(QtWidgets.QSystemTrayIcon):
         self.settings_dialog = None
         self.about_dialog = None
         
-        # --- ДОБАВЛЕНО: Переменные для динамического тултипа ---
+        # --- ВОЗВРАЩАЕМ НЕДОСТАЮЩИЕ ПЕРЕМЕННЫЕ ---
         self.last_update_time = 0
         self.base_tooltip_text = ""
 
@@ -56,7 +56,6 @@ class App(QtWidgets.QSystemTrayIcon):
         self.app_icon = self._load_icon("logo.ico")
         self.moon_icon = self._load_icon("moon.png")
         self.no_internet_icon = create_no_internet_icon()
-        # --- ДОБАВЛЕНО: Предварительная загрузка логотипа ---
         self.about_logo_pixmap = self._load_pixmap("about_logo.png", 96)
         
         self.sound_samples, self.sound_samplerate = self._load_sound_file(f"notification_{self.volume_level}.wav")
@@ -70,7 +69,32 @@ class App(QtWidgets.QSystemTrayIcon):
         self.setToolTip(self.tr.get("initializing_tooltip"))
         
         self.activated.connect(self.on_activated)
-        QtCore.QTimer.singleShot(100, self.main_update_loop)
+        
+        # Запускаем наши циклы с небольшой задержкой
+        QtCore.QTimer.singleShot(100, self._handle_first_launch_tasks)
+        QtCore.QTimer.singleShot(200, self.main_update_loop)
+
+    def _handle_first_launch_tasks(self):
+        """
+        Выполняет действия, необходимые только при первом запуске.
+        """
+        # Проверяем флаг, который мы теперь будем использовать
+        if self.config.shortcut_prompted:
+            return
+
+        dialog = CustomQuestionDialog(
+            self.tr.get("shortcut_dialog_title"),
+            self.tr.get("shortcut_dialog_text"),
+            self.tr,
+            self.app_icon
+        )
+        
+        if dialog.exec():
+            create_desktop_shortcut()
+        
+        # Устанавливаем флаг, чтобы больше не спрашивать.
+        self.config.settings.setValue("main/shortcut_prompted", True)
+        self.config.shortcut_prompted = True
 
     def load_app_settings(self):
         cfg = self.config
@@ -215,28 +239,48 @@ class App(QtWidgets.QSystemTrayIcon):
         self.setToolTip(full_tooltip)
 
     def open_settings_dialog(self):
-        if self.settings_dialog and self.settings_dialog.isVisible():
-            self.settings_dialog.raise_(); self.settings_dialog.activateWindow(); return
+        # Если окно уже существует, выводим его на передний план и выходим
+        if self.settings_dialog:
+            self.settings_dialog.raise_()
+            self.settings_dialog.activateWindow()
+            return
 
+        # Если окна нет, создаем его и сохраняем ссылку
         self.settings_dialog = SettingsDialog(self.app_icon, self.tr, self.tr.available_languages, self.config, None)
-        old_lang = self.config.language
-        dialog = SettingsDialog(self.app_icon, self.tr, self.tr.available_languages, self.config, None)
         
-        old_lang = self.config.language
+        # Привязываем наши действия к сигналам
+        self.settings_dialog.accepted.connect(self.on_settings_accepted)
+        self.settings_dialog.rejected.connect(self.on_settings_rejected)
         
-        # Теперь мы вызываем .exec() у правильной переменной 'dialog'
-        if dialog.exec():
-            new_settings = dialog.get_settings()
-            self.config.save_settings(new_settings)
-            set_autostart_shortcut(new_settings['autostart'])
-            self.load_app_settings()
-            
-            # Перезагружаем звуки с новым уровнем громкости
-            self.sound_samples, self.sound_samplerate = self._load_sound_file(f"notification_{self.volume_level}.wav")
-            self.alert_sound_samples, self.alert_sound_samplerate = self._load_sound_file(f"alert_{self.volume_level}.wav")
+        # Показываем окно (неблокирующий вызов)
+        self.settings_dialog.show()
 
-            if old_lang != self.config.language:
-                self.reload_ui_texts()
+    def on_settings_accepted(self):
+        """Вызывается при нажатии OK в настройках."""
+        if not self.settings_dialog: return
+
+        old_lang = self.config.language
+        
+        new_settings = self.settings_dialog.get_settings()
+        self.config.save_settings(new_settings)
+        set_autostart_shortcut(new_settings['autostart'])
+        self.load_app_settings()
+        
+        # Перезагружаем звуки с новым уровнем громкости
+        self.sound_samples, self.sound_samplerate = self._load_sound_file(f"notification_{self.volume_level}.wav")
+        self.alert_sound_samples, self.alert_sound_samplerate = self._load_sound_file(f"alert_{self.volume_level}.wav")
+
+        if old_lang != self.config.language:
+            self.reload_ui_texts()
+            
+        self.settings_dialog.close() # Закрываем окно
+        self.settings_dialog = None  # Сбрасываем ссылку
+
+    def on_settings_rejected(self):
+        """Вызывается при нажатии Cancel или крестика."""
+        if not self.settings_dialog: return
+        self.settings_dialog.close() # Закрываем окно
+        self.settings_dialog = None # Просто сбрасываем ссылку
 
     def reload_ui_texts(self):
         self.tr = Translator(resource_path("assets/i18n"))

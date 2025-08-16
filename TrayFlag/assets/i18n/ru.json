@@ -68,5 +68,10 @@
     "settings_volume_level": "Громкость:",
     "volume_low": "Тихо",
     "volume_medium": "Средне",
-    "volume_high": "Громко"
+    "volume_high": "Громко",
+
+    "shortcut_dialog_title": "Создать ярлык?",
+    "shortcut_dialog_text": "Это первый запуск TrayFlag. Хотите создать ярлык на рабочем столе для быстрого доступа?",
+    "button_yes": "Да",
+    "button_no": "Нет"
 }
