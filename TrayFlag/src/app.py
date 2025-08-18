@@ -12,7 +12,7 @@ from utils import resource_path, create_no_internet_icon, set_autostart_shortcut
 from config import ConfigManager, SETTINGS_FILE_PATH
 from constants import __version__, RELEASE_DATE
 from translator import Translator, get_initial_language_code
-from ip_fetcher import get_ip_data_from_go
+from ip_fetcher import get_ip_data_from_rust
 from dialogs import AboutDialog, SettingsDialog, CustomQuestionDialog
 from tray_menu import TrayMenuManager
 import idle_detector
@@ -25,8 +25,11 @@ except ImportError:
     sound_libs_available = False
 
 class App(QtWidgets.QSystemTrayIcon):
+    ipDataReceived = QtCore.Signal(object, bool) # (ip_data, is_forced)
     def __init__(self):
         super().__init__()
+
+        self.ipDataReceived.connect(self.on_ip_data_received)
         
         self.config = ConfigManager()
         self.tr = Translator(resource_path("assets/i18n"))
@@ -157,32 +160,68 @@ class App(QtWidgets.QSystemTrayIcon):
             final_interval_ms = max(1000, interval_ms)
             self.timer.start(final_interval_ms)
 
+    
     def reset_to_active_mode(self):
-        self.is_in_idle_mode = False
-        self.schedule_next_update()
+            """Просто устанавливает флаг активного режима."""
+            self.is_in_idle_mode = False
 
+# File: src/app.py
+
+    # --- ЗАМЕНИТЕ ВАШУ СТАРУЮ update_location_icon НА ЭТУ ---
     def update_location_icon(self, is_forced_by_user=False):
-        if is_forced_by_user:
-            if self.timer.isActive(): self.timer.stop()
-            self.reset_to_active_mode()
-
-        ip_data = get_ip_data_from_go()
+        #### print("DEBUG: 1. update_location_icon called. Starting background task...")
+        """Запускает фоновую задачу по обновлению IP."""
         
+        # --- НАЧАЛО ИСПРАВЛЕНИЙ ---
+        if is_forced_by_user:
+            # Если это ручной запуск, останавливаем текущий таймер, чтобы избежать гонки
+            if self.timer.isActive():
+                self.timer.stop()
+        
+        # В любом случае (и ручном, и автоматическом) запускаем проверку в фоне
+        threading.Thread(target=self._update_location_task, args=(is_forced_by_user,), daemon=True).start()
+        
+        # В любом случае планируем СЛЕДУЮЩЕЕ обновление
+        self.schedule_next_update()
+        # --- КОНЕЦ ИСПРАВЛЕНИЙ ---
+
+    # --- ДОБАВЬТЕ ЭТИ ДВА НОВЫХ МЕТОДА В КЛАСС App ---
+    def _update_location_task(self, is_forced):
+        #### print("DEBUG: 2. _update_location_task started in background thread.")
+        """
+        Эта функция выполняется в фоновом потоке.
+        Она делает "тяжелый" вызов и отправляет результат в главный поток через сигнал.
+        """
+        # Переименовываем, как и договаривались
+        ip_data = get_ip_data_from_rust() 
+        self.ipDataReceived.emit(ip_data, is_forced)
+
+    @QtCore.Slot(object, bool) # <-- Принимаем ДВА аргумента
+    def on_ip_data_received(self, ip_data, is_forced):
+        #### print(f"DEBUG: 4. Main thread received data: {ip_data}")
+        """
+        Этот слот выполняется в ГЛАВНОМ потоке и безопасно обновляет GUI.
+        Здесь находится вся старая логика обработки результата.
+        """
         if not ip_data or ip_data.get('ip') == "N/A":
             self.setIcon(self.no_internet_icon)
             self.setToolTip(self.tr.get("error_tooltip", error=self.tr.get("no_external_ip_detected")))
             self.base_tooltip_text = ""
-            if self.last_known_external_ip != "N/A": self.play_alert_sound_threaded()
+            if self.last_known_external_ip != "N/A":
+                self.play_alert_sound_threaded()
             self.last_known_external_ip = "N/A"
         else:
-            # --- ИЗМЕНЕНИЕ: Обновляем время при каждой проверке ---
             self.last_update_time = time.time()
             current_ip = ip_data.get('ip')
             full_data = ip_data.get('full_data', {})
             
-            if current_ip != self.last_known_external_ip or is_forced_by_user:
-                if full_data: self.current_location_data = full_data
-                else: self.current_location_data = {'ip': current_ip, 'country_code': '??', 'city': 'N/A', 'isp': 'N/A'}
+            # Здесь is_forced_by_user не нужен, т.к. мы обновляем GUI
+            # каждый раз, когда получаем новые данные.
+            if current_ip != self.last_known_external_ip or is_forced:
+                if full_data:
+                    self.current_location_data = full_data
+                else:
+                    self.current_location_data = {'ip': current_ip, 'country_code': '??', 'city': 'N/A', 'isp': 'N/A'}
                 
                 if self.last_known_external_ip != current_ip:
                     if self.location_history and self.location_history[-1]['ip'] != self.current_location_data['ip']:
@@ -194,11 +233,9 @@ class App(QtWidgets.QSystemTrayIcon):
                 self.update_gui_with_new_data()
             else:
                 self.update_tooltip_time()
-        
-        if not is_forced_by_user:
-            self.schedule_next_update()
 
     def update_gui_with_new_data(self):
+        #### print("DEBUG: 5. update_gui_with_new_data called. Updating UI.")
         data = self.current_location_data
         country_code = data.get('country_code', '')
         icon = self._load_icon(f"{country_code}.png", "flags")
@@ -299,8 +336,11 @@ class App(QtWidgets.QSystemTrayIcon):
         self.about_dialog.exec()
 
     def on_activated(self, reason):
-        if self.is_in_idle_mode: self.exit_idle_mode()
-        elif reason == self.ActivationReason.Trigger: self.update_location_icon(is_forced_by_user=True)
+            """Вызывается при клике на иконку."""
+            # ЛКМ (Trigger) теперь всегда вызывает принудительное обновление.
+            # А `update_location_icon` сама разберется, нужно ли выходить из простоя.
+            if reason == self.ActivationReason.Trigger:
+                self.update_location_icon(is_forced_by_user=True)
 
     def _load_icon(self, filename, subfolder="icons", size=20):
         try:

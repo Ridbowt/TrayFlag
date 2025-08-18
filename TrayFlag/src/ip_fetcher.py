@@ -4,7 +4,7 @@ import json
 import os
 from utils import resource_path
 
-def get_ip_data_from_go():
+def get_ip_data_from_rust():
     go_exe_path = resource_path("ip_lookup.exe")
     if not os.path.isfile(go_exe_path):
         print(f"Error: Go executable not found at {go_exe_path}")
