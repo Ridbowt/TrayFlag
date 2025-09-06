@@ -1,5 +1,7 @@
 # File: src/dialogs.py
+
 import os
+import webbrowser
 from PySide6 import QtWidgets, QtGui, QtCore
 from utils import resource_path
 from constants import APP_NAME
@@ -14,50 +16,54 @@ class AboutDialog(QtWidgets.QDialog):
         
         self.setWindowTitle(self.tr.get("about_dialog_title", app_name=APP_NAME))
         self.setWindowIcon(app_icon)
-        self.setFixedSize(610, 397)
+        self.setFixedSize(624, 425)
 
         layout = QtWidgets.QVBoxLayout(self)
         
-        # --- НОВЫЙ БЛОК: Создаем "шапку" с горизонтальной компоновкой ---
         header_widget = QtWidgets.QWidget()
         header_layout = QtWidgets.QHBoxLayout(header_widget)
-        header_layout.setContentsMargins(0, 0, 0, 0) # Убираем лишние отступы
+        header_layout.setContentsMargins(0, 0, 0, 0)
 
-        # Левая часть шапки: Логотип
         logo_label = QtWidgets.QLabel()
         if logo_pixmap:
             logo_label.setPixmap(logo_pixmap)
         logo_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft | QtCore.Qt.AlignmentFlag.AlignVCenter)
-        logo_label.setContentsMargins(10, 0, 20, 0) # Отступы справа от лого
+        logo_label.setContentsMargins(10, 0, 20, 0)
 
-        # Правая часть шапки: Название, версия, сайт
         title_widget = QtWidgets.QWidget()
         title_layout = QtWidgets.QVBoxLayout(title_widget)
         title_layout.setContentsMargins(0, 0, 0, 0)
-        title_layout.setSpacing(2) # Уменьшаем расстояние между строками
+        title_layout.setSpacing(2)
 
         title_label = QtWidgets.QLabel(f"<b>{APP_NAME}</b>")
         font = title_label.font(); font.setPointSize(14); title_label.setFont(font)
         
         version_label = QtWidgets.QLabel(self.tr.get("about_version", version=version, release_date=release_date))
         
-        website_label = QtWidgets.QLabel(f'<a href="https://github.com/Ridbowt/TrayFlag">{self.tr.get("about_website")}</a>')
+        website_label = QtWidgets.QLabel(f'⭐ <a href="https://github.com/Ridbowt/TrayFlag">{self.tr.get("about_website")}</a>')
         website_label.setOpenExternalLinks(True)
+
+        telegram_label = QtWidgets.QLabel(f'✈️ <a href="https://t.me/trayflag">{self.tr.get("about_telegram")}</a>')
+        telegram_label.setOpenExternalLinks(True)
 
         title_layout.addWidget(title_label)
         title_layout.addWidget(version_label)
         title_layout.addWidget(website_label)
-        title_layout.addStretch() # Прижимает текст к верху
+        title_layout.addWidget(telegram_label)
+        title_layout.addStretch()
 
-        # Добавляем логотип и текст в шапку
         header_layout.addWidget(logo_label)
         header_layout.addWidget(title_widget)
-        # --- КОНЕЦ БЛОКА "ШАПКИ" ---
 
-        # --- Остальные виджеты (без изменений) ---
-        acknowledgements_box = QtWidgets.QGroupBox(self.tr.get("about_acknowledgements"))
-        ack_layout = QtWidgets.QVBoxLayout()
-        ack_layout.setContentsMargins(5, 10, 5, 5)
+# --- START OF NEW TAB BLOCK ---
+        
+        # Create a container for tabs
+        tabs = QtWidgets.QTabWidget()
+
+        # --- TAB 1: Acknowledgements ---
+        acknowledgements_widget = QtWidgets.QWidget()
+        ack_layout = QtWidgets.QVBoxLayout(acknowledgements_widget)
+        ack_layout.setContentsMargins(10, 10, 10, 10)
         ack_layout.setSpacing(5)
         
         ack_keys = ['ip_services', 'flags', 'app_icon', 'logo_builder', 'sound', 'code', 'ai']
@@ -72,32 +78,75 @@ class AboutDialog(QtWidgets.QDialog):
                 line = QtWidgets.QFrame(); line.setFrameShape(QtWidgets.QFrame.Shape.HLine)
                 line.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken); line.setStyleSheet(f"background-color: {line_color};"); line.setFixedHeight(1)
                 ack_layout.addWidget(line)
-        acknowledgements_box.setLayout(ack_layout)
         
-        # --- НАЧАЛО ИЗМЕНЕННОГО БЛОКА ---
-        button_box = QtWidgets.QDialogButtonBox(self)
-        ok_button = button_box.addButton(self.tr.get("button_ok"), QtWidgets.QDialogButtonBox.ButtonRole.AcceptRole)
+        # --- TAB 2: Sponsors ---
+        sponsors_widget = QtWidgets.QWidget()
+        sponsors_layout = QtWidgets.QVBoxLayout(sponsors_widget)
         
-        # Теперь стиль берется из нашего модуля themes
-        ok_button.setStyleSheet(themes.get_button_style("info"))
+        sponsors_text = QtWidgets.QTextEdit()
+        sponsors_text.setReadOnly(True)
         
-        button_box.accepted.connect(self.accept)
-        # --- КОНЕЦ ИЗМЕНЕННОГО БЛОКА ---
+        # Attempt to load the list of sponsors from a file
+        try:
+            sponsors_file_path = resource_path(os.path.join("assets", "sponsors.txt"))
+            with open(sponsors_file_path, 'r', encoding='utf-8') as f:
+                # Read all lines, removing empty ones and extra spaces
+                sponsors_list = [line.strip() for line in f if line.strip()]
+            
+            if sponsors_list:
+                sponsors_text.setPlainText("\n".join(sponsors_list))
+            else:
+                # If the file is empty
+                sponsors_text.setPlainText(self.tr.get("sponsors_list_empty"))
+        except FileNotFoundError:
+            # If the file doesn't exist
+            sponsors_text.setPlainText(self.tr.get("sponsors_list_empty"))
+        except Exception as e:
+            # If there's any other error
+            sponsors_text.setPlainText(self.tr.get("sponsors_list_error"))
+            print(f"Error loading sponsors.txt: {e}") # Для отладки
+        
+        sponsors_layout.addWidget(sponsors_text)
 
-        # --- Добавляем все блоки в главную ВЕРТИКАЛЬНУЮ компоновку ---
+        # Add tabs to the tab widget
+        tabs.addTab(acknowledgements_widget, self.tr.get("about_tab_acknowledgements"))
+        tabs.addTab(sponsors_widget, self.tr.get("about_tab_sponsors"))
+
+        # --- ЕND OF NEW TAB BLOCK ---
+
+        bottom_panel = QtWidgets.QWidget()
+        buttons_layout = QtWidgets.QHBoxLayout(bottom_panel)
+        buttons_layout.setContentsMargins(0, 0, 0, 0)
+
+        # --- Boosty Button (Left) ---
+        boosty_button = QtWidgets.QPushButton(self.tr.get("button_support_on_boosty"))
+        boosty_color = "#F15F2C"; boosty_hover_color = "#FF7F4C"
+        boosty_button.setStyleSheet(f"""
+            QPushButton {{ 
+                background-color: {boosty_color}; color: white; border: none; 
+                padding: 5px 15px; border-radius: 3px; font-weight: bold; 
+            }}
+            QPushButton:hover {{ background-color: {boosty_hover_color}; }}
+        """)
+        boosty_button.clicked.connect(lambda: webbrowser.open("https://boosty.to/trayflag"))
+        
+        ok_button = QtWidgets.QPushButton(self.tr.get("button_ok"))
+        ok_button.setStyleSheet(themes.get_button_style("info"))
+        ok_button.clicked.connect(self.accept)
+
+        buttons_layout.addWidget(boosty_button)
+        buttons_layout.addStretch()
+        buttons_layout.addWidget(ok_button)
+
         layout.addWidget(header_widget)
-        layout.addWidget(acknowledgements_box)
+        layout.addWidget(tabs)
         layout.addStretch()
-        layout.addWidget(button_box)
-    # --- КОНЕЦ КОДА ДЛЯ ЗАМЕНЫ ---
+        layout.addWidget(bottom_panel)
 
 class SettingsDialog(QtWidgets.QDialog):
     def __init__(self, app_icon, tr, available_langs, current_config, parent=None):
         super().__init__(parent)
-        # --- ДОБАВЬТЕ ЭТИ ДВЕ СТРОКИ ---
-#        self.setObjectName("settingsDialog")
-#        self.setStyleSheet(themes.get_settings_dialog_style())
-        # --- КОНЕЦ БЛОКА ---
+
         self.tr = tr
         self.setWindowTitle(tr.get("settings_dialog_title", app_name=APP_NAME))
         self.setWindowIcon(app_icon)
@@ -110,17 +159,16 @@ class SettingsDialog(QtWidgets.QDialog):
         tabs.addTab(idle_tab, self.tr.get("settings_tab_idle"))
         layout.addWidget(tabs)
 
-        # --- General Tab ---
         general_layout = QtWidgets.QFormLayout(general_tab)
         self.language_combo = QtWidgets.QComboBox()
         for code, name in available_langs.items(): self.language_combo.addItem(name, code)
-        # --- ВОЗВРАЩАЕМ СТАРУЮ, РАБОЧУЮ ЛОГИКУ ---
+
         current_lang_code = current_config.language
-        # Ищем индекс элемента, чьи "скрытые данные" (код языка) нам нужны
+
         index = self.language_combo.findData(current_lang_code)
-        if index != -1: # findData возвращает -1, если ничего не найдено
+        if index != -1:
             self.language_combo.setCurrentIndex(index)
-        # --- КОНЕЦ ИСПРАВЛЕННОГО БЛОКА ---
+
         general_layout.addRow(tr.get("settings_language"), self.language_combo)
         self.update_interval_spinbox = QtWidgets.QSpinBox()
         self.update_interval_spinbox.setMinimum(4); self.update_interval_spinbox.setMaximum(300); self.update_interval_spinbox.setSuffix(" s")
@@ -128,40 +176,33 @@ class SettingsDialog(QtWidgets.QDialog):
         general_layout.addRow(tr.get("settings_update_interval"), self.update_interval_spinbox)
         self.autostart_checkbox = QtWidgets.QCheckBox(tr.get("settings_autostart")); self.autostart_checkbox.setChecked(current_config.autostart); general_layout.addRow(self.autostart_checkbox)
         self.notifications_checkbox = QtWidgets.QCheckBox(tr.get("settings_notifications")); self.notifications_checkbox.setChecked(current_config.notifications); general_layout.addRow(self.notifications_checkbox)
+
         self.sound_checkbox = QtWidgets.QCheckBox(tr.get("settings_sound")); self.sound_checkbox.setChecked(current_config.sound); general_layout.addRow(self.sound_checkbox)
 
-                # --- НАЧАЛО НОВОГО КОДА ---
-        # Создаем группу для радио-кнопок громкости
         self.volume_groupbox = QtWidgets.QGroupBox(self.tr.get("settings_volume_level"))
-        volume_layout = QtWidgets.QHBoxLayout() # Горизонтальная компоновка
+        volume_layout = QtWidgets.QHBoxLayout()
         self.volume_groupbox.setLayout(volume_layout)
 
-        # Создаем сами радио-кнопки
         self.volume_low_rb = QtWidgets.QRadioButton(self.tr.get("volume_low"))
         self.volume_medium_rb = QtWidgets.QRadioButton(self.tr.get("volume_medium"))
         self.volume_high_rb = QtWidgets.QRadioButton(self.tr.get("volume_high"))
 
-        # Добавляем их в компоновку
         volume_layout.addWidget(self.volume_low_rb)
         volume_layout.addWidget(self.volume_medium_rb)
         volume_layout.addWidget(self.volume_high_rb)
 
-        # Устанавливаем текущее значение
         if current_config.volume_level == "low":
             self.volume_low_rb.setChecked(True)
         elif current_config.volume_level == "high":
             self.volume_high_rb.setChecked(True)
-        else: # medium по умолчанию
+        else:
             self.volume_medium_rb.setChecked(True)
         
         general_layout.addRow(self.volume_groupbox)
 
-        # Логика включения/выключения группы
         self.sound_checkbox.toggled.connect(self.volume_groupbox.setEnabled)
         self.volume_groupbox.setEnabled(current_config.sound)
-        # --- КОНЕЦ НОВОГО КОДА ---
 
-        # --- Idle Mode Tab ---
         idle_layout = QtWidgets.QVBoxLayout(idle_tab)
         self.idle_enabled_checkbox = QtWidgets.QCheckBox(self.tr.get("settings_idle_enable")); self.idle_enabled_checkbox.setChecked(current_config.idle_enabled); idle_layout.addWidget(self.idle_enabled_checkbox)
         self.idle_options_widget = QtWidgets.QWidget()
@@ -178,23 +219,18 @@ class SettingsDialog(QtWidgets.QDialog):
         self.idle_enabled_checkbox.toggled.connect(self.idle_options_widget.setEnabled)
         self.idle_options_widget.setEnabled(current_config.idle_enabled)
 
-        # --- Buttons ---
-        # --- НАЧАЛО ИЗМЕНЕННОГО БЛОКА ---
         button_box = QtWidgets.QDialogButtonBox(self)
         ok_button = button_box.addButton(self.tr.get("button_ok"), QtWidgets.QDialogButtonBox.ButtonRole.AcceptRole)
         cancel_button = button_box.addButton(self.tr.get("button_cancel"), QtWidgets.QDialogButtonBox.ButtonRole.RejectRole)
         
-        # Стили теперь берутся из модуля themes
         ok_button.setStyleSheet(themes.get_button_style("ok"))
         cancel_button.setStyleSheet(themes.get_button_style("cancel"))
         
         button_box.accepted.connect(self.accept)
         button_box.rejected.connect(self.reject)
         layout.addWidget(button_box)
-        # --- КОНЕЦ ИЗМЕНЕННОГО БЛОКА ---
 
     def get_settings(self):
-        """Собирает все значения из виджетов и возвращает в виде словаря."""
         volume_level = "medium"
         if self.volume_low_rb.isChecked():
             volume_level = "low"
@@ -213,11 +249,6 @@ class SettingsDialog(QtWidgets.QDialog):
             'idle_interval_mins': self.idle_interval_spinbox.value(),
         }
 
-# File: src/dialogs.py
-
-# ... (импорты и класс AboutDialog, SettingsDialog) ...
-
-# --- ДОБАВЬТЕ ЭТОТ КЛАСС В КОНЕЦ ФАЙЛА ---
 class CustomQuestionDialog(QtWidgets.QDialog):
     def __init__(self, title, text, tr, app_icon, parent=None):
         super().__init__(parent)
@@ -225,8 +256,7 @@ class CustomQuestionDialog(QtWidgets.QDialog):
         self.setWindowTitle(title)
         self.setWindowIcon(app_icon)
         
-        # Применяем нашу темную тему
-        self.setObjectName("aboutDialog") # Используем тот же стиль, что и у "О программе"
+        self.setObjectName("aboutDialog")
         self.setStyleSheet(themes.get_about_dialog_style())
 
         layout = QtWidgets.QVBoxLayout(self)
@@ -261,13 +291,11 @@ class CustomQuestionDialog(QtWidgets.QDialog):
         layout.addLayout(button_layout)
 
     def get_settings(self):
-                # --- НАЧАЛО НОВОГО КОДА ---
         volume_level = "medium"
         if self.volume_low_rb.isChecked():
             volume_level = "low"
         elif self.volume_high_rb.isChecked():
             volume_level = "high"
-        # --- КОНЕЦ НОВОГО КОДА ---
         return {
             'language': self.language_combo.currentData(), 'update_interval': self.update_interval_spinbox.value(),
             'autostart': self.autostart_checkbox.isChecked(), 'notifications': self.notifications_checkbox.isChecked(),

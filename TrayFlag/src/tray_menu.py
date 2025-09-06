@@ -1,8 +1,9 @@
 # File: src/tray_menu.py
+
 from PySide6 import QtWidgets, QtGui
 from functools import partial
 from utils import clean_isp_name
-from constants import APP_NAME # <-- ИЗМЕНЕНО
+from constants import APP_NAME
 
 class TrayMenuManager:
     def __init__(self, app_instance):

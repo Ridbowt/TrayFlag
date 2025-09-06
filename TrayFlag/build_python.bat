@@ -10,7 +10,7 @@ if exist "build" rmdir /s /q build
 echo.
 echo Compiling with Nuitka...
 
-rem Проверяем, что ip_lookup.exe на месте
+rem Check that ip_lookup.exe is in place
 if not exist "src\ip_lookup.exe" (
     echo.
     echo ERROR: ip_lookup.exe not found in 'src' folder.

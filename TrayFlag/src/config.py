@@ -1,4 +1,5 @@
-# File: src/config.py (ФИНАЛЬНАЯ ВЕРСИЯ С ПОЛНЫМ .INI)
+# File: src/config.py
+
 import os
 from PySide6.QtCore import QSettings
 from utils import resource_path
@@ -10,7 +11,7 @@ class ConfigManager:
     def __init__(self):
         self.settings = QSettings(SETTINGS_FILE_PATH, QSettings.Format.IniFormat)
         
-        # Проверяем, существует ли файл. Если нет - создаем и наполняем.
+        # Check if the file exists. If not, create it and populate it.
         if not os.path.exists(SETTINGS_FILE_PATH) or not self.settings.childGroups():
             print(f"INI file not found or empty. Creating a new one with default settings at: {SETTINGS_FILE_PATH}")
             self._create_default_ini()
@@ -18,8 +19,12 @@ class ConfigManager:
         self.load_settings()
 
     def _create_default_ini(self):
-        """Создает .ini файл и наполняет его значениями по умолчанию."""
-        # Секция [main]
+        """Creates a .ini file and fills it with default values."""
+        
+        # Section with Version
+        self.settings.setValue(f"{APP_NAME}/version", __version__)
+        
+        # Section [main]
         self.settings.setValue("main/language", "") # Пусто, чтобы определился язык системы
         self.settings.setValue("main/autostart", False)
         self.settings.setValue("main/notifications", True)
@@ -28,24 +33,21 @@ class ConfigManager:
         self.settings.setValue("main/volume_level", "medium")
         self.settings.setValue("main/shortcut_prompted", False)
         
-        # Секция [intervals]
+        # Section [intervals]
         self.settings.setValue("intervals/active", 7)
         
-        # Секция [idle]
+        # Section [idle]
         self.settings.setValue("idle/enabled", True)
         self.settings.setValue("idle/threshold_mins", 15)
         self.settings.setValue("idle/interval_mins", 60)
         
-        # Секция с версией
-        self.settings.setValue(f"{APP_NAME}/version", __version__)
-        
-        # Убедимся, что все записалось на диск
+        # Make sure everything is written to disk
         self.settings.sync()
 
     def load_settings(self):
-        """Загружает все настройки из .ini файла в атрибуты класса."""
-        # Теперь мы можем быть уверены, что ключи существуют,
-        # но все равно оставляем значения по умолчанию на случай, если пользователь вручную удалит строку.
+        """Loads all settings from the .ini file into class attributes."""
+        # Now we can be sure that the keys exist,
+        # but we still keep default values in case the user manually deletes a line.
         self.language = self.settings.value("main/language", "", type=str)
         self.volume_level = self.settings.value("main/volume_level", "medium", type=str) # low, medium, high
         self.shortcut_prompted = self.settings.value("main/shortcut_prompted", False, type=bool)
@@ -62,7 +64,7 @@ class ConfigManager:
         self._check_and_update_version()
 
     def save_settings(self, values):
-        """Сохраняет словарь с настройками в .ini файл."""
+        """Saves the settings dictionary to a .ini file."""
         self.settings.setValue("main/language", values['language'])
         self.settings.setValue("main/autostart", values['autostart'])
         self.settings.setValue("main/notifications", values['notifications'])
@@ -78,7 +80,7 @@ class ConfigManager:
         self.load_settings()
 
     def _check_and_update_version(self):
-        """Проверяет версию в .ini и обновляет ее при необходимости."""
+        """Checks the version in the .ini and updates it if necessary."""
         ini_version = self.settings.value(f"{APP_NAME}/version", "0.0.0", type=str)
         if ini_version != __version__:
             print(f"INFO: INI version mismatch. Updating from {ini_version} to {__version__}.")

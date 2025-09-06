@@ -1,4 +1,4 @@
-# File: src/app.py (ФИНАЛЬНАЯ ВЕРСИЯ ПОСЛЕ РЕФАКТОРИНГА)
+# File: src/app.py
 
 import os
 import webbrowser
@@ -19,7 +19,7 @@ class App(QtWidgets.QSystemTrayIcon):
     def __init__(self):
         super().__init__()
         
-        # --- 1. Инициализация менеджеров ---
+        # --- 1. Initialization of Managers ---
         self.config = ConfigManager()
         self.state = AppState()
         self.tr = Translator(resource_path("assets/i18n"))
@@ -28,23 +28,23 @@ class App(QtWidgets.QSystemTrayIcon):
         self.settings_dialog = None
         self.about_dialog = None
 
-        # --- 2. Создаем и настраиваем UpdateHandler ---
+        # --- 2. Create and Configure UpdateHandler ---
         self.update_handler = UpdateHandler(self.config, self.state)
         self.update_handler.ipDataReceived.connect(self.on_ip_data_received)
         self.update_handler.enteredIdleMode.connect(self.on_entered_idle_mode)
         
-        # --- 3. Загружаем настройки и ресурсы ---
+        # --- 3. Load Settings and Resources ---
         self.load_app_settings()
         self.app_icon = self._load_icon("logo.ico")
         self.moon_icon = self._load_icon("moon.png")
         self.no_internet_icon = create_no_internet_icon()
         self.about_logo_pixmap = self._load_pixmap("about_logo.png", 96)
         
-        # --- 4. Создаем GUI ---
+        # --- 4. Create GUI ---
         self.menu_manager = TrayMenuManager(self)
         self.setContextMenu(self.menu_manager.menu)
         
-        # --- 5. Финальная настройка и запуск ---
+        # --- 5. Final Setup and Launch ---
         self.setIcon(self.app_icon or self.no_internet_icon)
         self.show()
         self.setToolTip(self.tr.get("initializing_tooltip"))
@@ -72,38 +72,55 @@ class App(QtWidgets.QSystemTrayIcon):
         self.tr.load_language(lang_code)
 
     @QtCore.Slot(object, bool)
-    def on_ip_data_received(self, ip_data, is_forced):
+    def on_ip_data_received(self, ip_data, is_forced):      
+        # 1. Check for network access error
         if not ip_data or ip_data.get('ip') == "N/A":
+
+            # 1. Log the error if this is the first error OR a manual launch
+            if self.state.last_known_external_ip != "N/A" or is_forced:
+                error_message = ip_data.get('full_data', {}).get('error', 'No external IP detected') if ip_data else 'No data received'
+                print(f"[ERROR] Failed to get IP data. Reason: {error_message}")
+            
+            # 2. Play the sound and show a notification if this is the FIRST error
             if self.state.last_known_external_ip != "N/A":
+                if self.config.notifications:
+                    self.showMessage(
+                        self.tr.get("network_lost_title"),
+                        self.tr.get("network_lost_message"),
+                        QtWidgets.QSystemTrayIcon.MessageIcon.Warning,
+                        5000
+                    )
                 self.sound_manager.play_alert()
+            
+            # 3. OR play the sound if this is a manual click (repeated error)
+            elif is_forced:
+                self.sound_manager.play_alert()
+
+            # 4. ALWAYS update the GUI to the error state
             self.state.clear_network_state()
             self.setIcon(self.no_internet_icon)
-            self.setToolTip(self.tr.get("error_tooltip", error=self.tr.get("no_external_ip_detected")))
+            self.setToolTip(self.tr.get("tooltip_error_get_ip"))
+            
             return
 
+        # 2. If we're here, it means there was NO error. Continue as usual.
         current_ip = ip_data.get('ip')
         full_data = ip_data.get('full_data', {})
-        
         ip_has_changed = (current_ip != self.state.last_known_external_ip)
 
-        # --- НАЧАЛО ПРОСТОЙ ИСПРАВЛЕННОЙ ЛОГИКИ ---
+        if ip_has_changed:
+            print(f"[SUCCESS] IP address has changed: {self.state.last_known_external_ip} -> {current_ip}")
         
-        # Если IP изменился ИЛИ это был ручной клик,
-        # мы всегда делаем полное обновление.
         if ip_has_changed or is_forced:
             if full_data:
                 self.state.update_location(full_data)
             else:
                 self.state.update_location({'ip': current_ip, 'country_code': '??', 'city': 'N/A', 'isp': 'N/A'})
-            
-            # Вызываем полное обновление GUI.
-            # Звук будет проигран внутри этой функции.
             self.update_gui_with_new_data()
-        # --- КОНЕЦ ПРОСТОЙ ИСПРАВЛЕННОЙ ЛОГИКИ ---
 
     @QtCore.Slot()
     def on_entered_idle_mode(self):
-        """Этот слот вызывается, когда приложение переходит в экономный режим."""
+        """This slot is called when the application enters power-saving mode."""
         self.setIcon(self.moon_icon or self.app_icon)
         self.setToolTip(self.tr.get("idle_mode_tooltip"))
 
@@ -126,7 +143,7 @@ class App(QtWidgets.QSystemTrayIcon):
         if self.config.notifications:
             self.showMessage(self.tr.get("location_updated_title"), 
                              self.tr.get("location_updated_message", ip=data.get('ip'), city=data.get('city'), country_code=country_code.upper()), 
-                             self.icon(), 5000)
+                             QtWidgets.QSystemTrayIcon.MessageIcon.Information, 5000)
 
         self.sound_manager.play_notification()
         
@@ -140,12 +157,49 @@ class App(QtWidgets.QSystemTrayIcon):
 
     def on_settings_accepted(self):
         if not self.settings_dialog: return
+
+        # --- 1. Remember old values for comparison ---
         old_lang = self.config.language
+        old_interval = self.config.update_interval
+        old_volume = self.config.volume_level        
+        old_notifications = self.config.notifications
+        old_sound = self.config.sound
+        old_idle_enabled = self.config.idle_enabled
+        old_idle_threshold = self.config.idle_threshold_mins
+        # (Other options can be added)
+
+        # 2. Get new values from the dialog
         new_settings = self.settings_dialog.get_settings()
+        
+        # --- 3. Compare and print ONLY changed values ---
+        print("--- Settings 'OK' clicked. Checking for changes... ---")
+        if old_interval != new_settings['update_interval']:
+            print(f"[INFO] Update interval changed: {old_interval}s -> {new_settings['update_interval']}s")
+        if old_lang != new_settings['language']:
+            print(f"[INFO] Language changed: {old_lang} -> {new_settings['language']}")
+
+        # --- 4. Your existing code stays the same ---
         self.config.save_settings(new_settings)
         set_autostart_shortcut(new_settings['autostart'])
         self.load_app_settings()
-        self.sound_manager.reload_sounds()
+        if old_volume != new_settings['volume_level']:
+            self.sound_manager.reload_sounds()
+        
+        if old_notifications != new_settings['notifications']:
+            status = "Enabled" if new_settings['notifications'] else "Disabled"
+            print(f"[INFO] Notifications changed: {status}")
+
+        if old_sound != new_settings['sound']:
+            status = "Enabled" if new_settings['sound'] else "Disabled"
+            print(f"[INFO] Sound changed: {status}")
+
+        if old_idle_enabled != new_settings['idle_enabled']:
+            status = "Enabled" if new_settings['idle_enabled'] else "Disabled"
+            print(f"[INFO] Idle Mode changed: {status}")
+
+        if old_idle_threshold != new_settings['idle_threshold_mins']:
+            print(f"[INFO] Idle threshold changed: {old_idle_threshold} min -> {new_settings['idle_threshold_mins']} min")
+
         if old_lang != self.config.language:
             self.reload_ui_texts()
         self.settings_dialog.close(); self.settings_dialog = None
@@ -157,7 +211,7 @@ class App(QtWidgets.QSystemTrayIcon):
     def reload_ui_texts(self):
         self.tr = Translator(resource_path("assets/i18n"))
         lang_code = get_initial_language_code(self.config.language)
-        self.tr.load_language(lang_code)
+        self.tr.load_language(lang_code, is_reload=True)
         self.menu_manager = TrayMenuManager(self)
         self.setContextMenu(self.menu_manager.menu)
         if self.state.current_location_data: self.menu_manager.update_menu_content()
@@ -172,6 +226,7 @@ class App(QtWidgets.QSystemTrayIcon):
         if self.state.is_in_idle_mode:
             self.update_handler.exit_idle_mode()
         elif reason == self.ActivationReason.Trigger:
+            print("[INFO] Tray icon clicked. Forcing IP update...")
             self.update_handler.update_location_icon(is_forced_by_user=True)
 
     def _load_icon(self, filename, subfolder="icons", size=20):

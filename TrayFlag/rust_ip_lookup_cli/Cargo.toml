@@ -1,10 +1,10 @@
 [package]
 name = "rust_ip_lookup_cli"
-version = "0.1.0"
+version = "0.2.2"
 edition = "2021"
 
 [dependencies]
-reqwest = { version = "0.12", features = ["json", "blocking"] } # Используем блокирующий клиент
+reqwest = { version = "0.12", features = ["json", "blocking"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-tokio = { version = "1", features = ["macros", "rt-multi-thread"] } # Для #[tokio::main]
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }

@@ -7,7 +7,7 @@
     "location_updated_message": "{ip}\n{city}, {country_code}",
     "copied_title": "Скопировано",
     "copied_message": "{source_name} {text} скопирован.",
-    "error_tooltip": "Ошибка: {error}",
+    "tooltip_error_get_ip": "Ошибка: Не удалось получить IP",
     "menu_ip_label": "💻 IP: {ip}",
     "menu_city_label": "📍 Город: {city}",
     "menu_isp_label": "🏢 Провайдер: {isp}",
@@ -24,7 +24,8 @@
     "menu_exit": "❌ Выход",
     "about_dialog_title": "О программе {app_name}",
     "about_version": "Версия {version} ({release_date})",
-    "about_website": "Сайт программы",
+    "about_website": "https://github.com/Ridbowt/TrayFlag",
+    "about_telegram": "https://t.me/trayflag",
     "about_acknowledgements": "Благодарности и ресурсы",
     "ack_ip_services": "<li><b>Сервисы геолокации IP:</b> <a href=\"https://www.ipify.org/\">ipify.org</a>, <a href=\"https://www.myip.com/\">myip.com</a>, <a href=\"https://ip-api.com/\">ip-api.com</a>, <a href=\"https://ipinfo.io/\">ipinfo.io</a>, <a href=\"https://www.ip-tracker.org/\">ip-tracker.org</a>, <a href=\"https://www.speedtest.net/\">speedtest.net</a>, <a href=\"https://ipleak.net/\">ipleak.net</a></li>",
     "ack_flags": "<li><b>Иконки флагов:</b> <a href=\"https://github.com/lipis/flag-icons\">lipis/flag-icons</a></li>",
@@ -73,5 +74,11 @@
     "shortcut_dialog_title": "Создать ярлык?",
     "shortcut_dialog_text": "Это первый запуск TrayFlag. Хотите создать ярлык на рабочем столе для быстрого доступа?",
     "button_yes": "Да",
-    "button_no": "Нет"
+    "button_no": "Нет",
+
+    "about_tab_acknowledgements": "🛠️ Благодарности",
+    "about_tab_sponsors": "❤️ Спонсоры",
+    "sponsors_list_empty": "Здесь может быть ваше имя! Поддержите проект на Boosty.",
+    "sponsors_list_error": "Не удалось загрузить список спонсоров.",
+    "button_support_on_boosty": "💛 Поддержать на Boosty"
 }

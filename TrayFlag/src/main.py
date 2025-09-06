@@ -2,13 +2,13 @@
 
 import sys
 import os
-from PySide6 import QtWidgets # Используем PySide6, как в вашем коде
+from PySide6 import QtWidgets
 import themes
 from utils import resource_path, create_desktop_shortcut
-from constants import APP_NAME, ORG_NAME
+from constants import APP_NAME, ORG_NAME, __version__
 from translator import Translator
 
-# --- Код для проверки одного экземпляра (без изменений) ---
+# --- Code to check for a single instance ---
 try:
     import win32event
     import win32api
@@ -32,18 +32,18 @@ class SingleInstance:
         if self.mutex:
             win32api.CloseHandle(self.mutex)
 
-# --- НОВАЯ ФУНКЦИЯ: Предложение создать ярлык ---
+# --- Prompt to Create Shortcut ---
 def handle_first_launch():
     """
-    Проверяет, первый ли это запуск, и предлагает создать ярлык.
+    Checks if this is the first launch and prompts to create a shortcut.
     """
     settings_path = resource_path(f"{APP_NAME}.ini")
     if os.path.exists(settings_path):
         return
 
-    # Создаем временный переводчик только для этого диалога
+    # Create a temporary translator just for this conversation
     tr = Translator(resource_path("assets/i18n"))
-    # Пытаемся определить системный язык для диалога
+    # Try to determine the system language for this conversation
     try:
         import locale
         system_lang, _ = locale.getdefaultlocale()
@@ -65,23 +65,25 @@ def handle_first_launch():
 
 
 if __name__ == "__main__":
-    # 1. Проверяем, не запущена ли уже копия
+    # 1. Check if another instance is already running
     mutex_name = f"TrayFlag-Instance-Mutex-8E2E7A4E"
     instance = SingleInstance(mutex_name)
     if instance.already_running():
-        print("Application is already running. Exiting.")
+        print("[WARNING] Application is already running. Exiting.")
         sys.exit(0)
+    
+    print(f"[INFO] --- {APP_NAME} v{__version__} starting up ---")
 
-    # 2. Создаем QApplication - он нужен для MessageBox
+    # 2. Create QApplication - it's needed for MessageBox
     qt_app = QtWidgets.QApplication(sys.argv)
 
-    # 4. Применяем стили и настройки (без изменений)
+    # 4. Apply styles and settings
     qt_app.setStyleSheet(themes.get_context_menu_style())
     qt_app.setApplicationName(APP_NAME)
     qt_app.setOrganizationName(ORG_NAME)
     qt_app.setQuitOnLastWindowClosed(False)
     
-    # 5. Импортируем и запускаем основное приложение (без изменений)
+    # 5. Import and run the main application
     from app import App
     main_app = App()
     

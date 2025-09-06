@@ -8,7 +8,7 @@ from ip_fetcher import get_ip_data_from_rust
 import idle_detector
 
 class UpdateHandler(QtCore.QObject):
-    # Сигнал, который будет отправлять данные в главный поток
+    # Signal that will send data to the main thread
     ipDataReceived = QtCore.Signal(object, bool) # (ip_data, is_forced)
     enteredIdleMode = QtCore.Signal()
 
@@ -17,30 +17,30 @@ class UpdateHandler(QtCore.QObject):
         self.config = config
         self.state = state
         
-        # Основной таймер для проверки IP
+        # Main timer for checking IP
         self.main_timer = QtCore.QTimer()
         self.main_timer.timeout.connect(self.main_update_loop)
         
-        # "Пульс-таймер" для проверки простоя
+        # "Pulse timer" for checking idleness
         self.idle_check_timer = QtCore.QTimer()
         self.idle_check_timer.setInterval(1000)
         self.idle_check_timer.timeout.connect(self.check_for_wakeup)
 
     def start(self):
-        """Запускает все таймеры и первую проверку."""
+        """Runs the main update loop and "pulse" timer."""
         self.idle_check_timer.start()
-        # Запускаем первую проверку с небольшой задержкой
+        # Run the main update loop after 200ms
         QtCore.QTimer.singleShot(200, self.main_update_loop)
 
     def check_for_wakeup(self):
-        """Проверяет, не пора ли выйти из экономного режима."""
+        """Checks if the user has woken up from idle mode."""
         if not self.state.is_in_idle_mode:
             return
         if not idle_detector.is_user_idle(self.config.idle_threshold_mins * 60):
             self.exit_idle_mode()
 
     def main_update_loop(self):
-        """Основной цикл, вызываемый по главному таймеру."""
+        """Main update loop, called every time the main timer fires."""
         if self.config.idle_enabled and not self.state.is_in_idle_mode:
             if idle_detector.is_user_idle(self.config.idle_threshold_mins * 60):
                 self.enter_idle_mode()

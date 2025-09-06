@@ -2,15 +2,15 @@
 
 def get_context_menu_style():
     """
-    Возвращает stylesheet для кастомизации QMenu.
+    Returns a stylesheet for customizing QMenu.
     """
-    menu_bg_color = "#2D2D2D"      # Наш графитовый цвет
-    text_color = "#F0F0F0"         # Светлый текст
-    selection_color = "#005A9C"   # Cиний для выделения
-    separator_color = "#606060"    # Цвет разделителя
+    menu_bg_color = "#2D2D2D"      # Our graphite color
+    text_color = "#F0F0F0"         # Light text
+    selection_color = "#005A9C"   # Blue for selection
+    separator_color = "#606060"    # Separator color
 
-    # --- НОВЫЙ ЦВЕТ ДЛЯ НЕАКТИВНОГО ТЕКСТА ---
-    disabled_text_color = "#909090" # Светло-серый, но темнее основного
+    # --- NEW COLOR FOR INACTIVE TEXT ---
+    disabled_text_color = "#909090" # Light gray, but darker than the main one
 
     return f"""
         QMenu {{
@@ -27,12 +27,12 @@ def get_context_menu_style():
             background-color: {selection_color};
         }}
         
-        /* --- НАЧАЛО НОВОГО БЛОКА --- */
+        /* --- BEGIN OF NEW BLOCK --- */
         QMenu::item:disabled {{
             color: {disabled_text_color};
-            background-color: transparent; /* Убедимся, что фон не меняется */
+            background-color: transparent; /* Make sure the background does not change */
         }}
-        /* --- КОНЕЦ НОВОГО БЛОКА --- */
+        /* --- END OF NEW BLOCK --- */
 
         QMenu::separator {{
             height: 1px;
@@ -44,18 +44,18 @@ def get_context_menu_style():
 
 def get_about_dialog_style():
     """
-    Возвращает стиль для окна "О программе" с графитовым фоном.
+    Returns the style for the "About" window with a graphite background.
     """
     dialog_bg_color = "#2D2D2D"
     text_color = "#F0F0F0"
     border_color = "#606060"
 
     return f"""
-        /* Применяем стиль только к QDialog, у которого есть свойство objectName='aboutDialog' */
+        /* Apply the style only to QDialog with objectName='aboutDialog' */
         QDialog#aboutDialog {{
             background-color: {dialog_bg_color};
         }}
-        /* Применяем стиль к дочерним элементам только внутри этого диалога */
+        /* Apply the style to child elements only within this dialog */
         QDialog#aboutDialog QLabel, 
         QDialog#aboutDialog QGroupBox {{
             color: {text_color};
@@ -73,9 +73,7 @@ def get_about_dialog_style():
         }}
     """
 
-# --- ДОБАВЬТЕ ЭТОТ КОД В КОНЕЦ ФАЙЛА themes.py ---
-
-# Словарь с палитрами для кнопок. Все цвета хранятся здесь.
+# Dictionary with palettes for buttons. All colors are stored here.
 BUTTON_PALETTES = {
     "ok": {
         "bg": "#3399FF",
@@ -99,8 +97,8 @@ BUTTON_PALETTES = {
 
 def get_button_style(button_type):
     """
-    Возвращает готовую строку stylesheet для кнопки.
-    button_type может быть 'ok', 'cancel', 'info'.
+    Returns the ready stylesheet string for the button.
+    button_type can be 'ok', 'cancel', 'info'
     """
     palette = BUTTON_PALETTES.get(button_type, BUTTON_PALETTES['cancel'])
     
@@ -123,19 +121,19 @@ def get_button_style(button_type):
 
 def get_settings_dialog_style():
     """
-    Возвращает стиль для окна "Настройки".
+    Returns the style for the "Settings" window.
     """
     dialog_bg_color = "#2D2D2D"
     text_color = "#F0F0F0"
     border_color = "#606060"
 
     return f"""
-        /* Применяем стиль только к QDialog с objectName='settingsDialog' */
+        /* Apply the style only to QDialog with objectName='settingsDialog' */
         QDialog#settingsDialog {{
             background-color: {dialog_bg_color};
         }}
-        /* Стили для дочерних элементов */
-        QDialog#settingsDialog QWidget, /* Важно для вкладок */
+        /* Styles for child elements */
+        QDialog#settingsDialog QWidget, /* Important for tabs */
         QDialog#settingsDialog QLabel, 
         QDialog#settingsDialog QGroupBox,
         QDialog#settingsDialog QCheckBox,
@@ -155,7 +153,7 @@ def get_settings_dialog_style():
             left: 10px;
             padding: 0 3px 0 3px;
         }}
-        /* Стиль для вкладок */
+        /* Styles for tabs */
         QDialog#settingsDialog QTabBar::tab {{
             color: {text_color};
             background-color: #555555;

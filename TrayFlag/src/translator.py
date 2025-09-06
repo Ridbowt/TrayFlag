@@ -1,4 +1,5 @@
 # File: src/translator.py
+
 import os
 import json
 import locale
@@ -23,7 +24,17 @@ class Translator:
                 langs[lang_code] = lang_code.upper()
         return langs
 
-    def load_language(self, lang_code):
+    def load_language(self, lang_code, is_reload=False):
+        """
+        Public method for loading/reloading the language.
+        Prints a message only if this is a reload.
+        """
+        if is_reload:
+            print(f"Language changed to '{lang_code}'. Reloading translations...")
+        
+        return self._load_language_internal(lang_code)
+
+    def _load_language_internal(self, lang_code):
         self.current_lang = lang_code
         if lang_code not in self.available_languages:
             self.current_lang = self.default_lang
@@ -32,13 +43,11 @@ class Translator:
         try:
             with open(filepath, 'r', encoding='utf-8') as f:
                 self.translations = json.load(f)
-            print(f"Language '{self.current_lang}' loaded successfully.")
         except Exception as e:
             print(f"Failed to load language '{self.current_lang}': {e}. Loading default.")
             if self.current_lang != self.default_lang:
-                self.load_language(self.default_lang)
-        
-        self._add_extra_strings()
+                self._load_language_internal(self.default_lang)
+
         return self.current_lang
 
     def get(self, key, **kwargs):
@@ -47,15 +56,6 @@ class Translator:
             return text.format(**kwargs)
         except (KeyError, IndexError):
             return text
-
-    def _add_extra_strings(self):
-        defaults = {
-            "ru": {"idle_mode_tooltip": "Экономный режим"},
-            "en": {"idle_mode_tooltip": "Idle Mode"}
-        }
-        lang_defaults = defaults.get(self.current_lang, defaults["en"])
-        for key, value in lang_defaults.items():
-            self.translations.setdefault(key, value)
 
 def get_initial_language_code(config_lang):
     if config_lang:

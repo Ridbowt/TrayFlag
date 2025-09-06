@@ -3,7 +3,7 @@
 from collections import deque
 
 class AppState:
-    """Хранит и управляет всем состоянием приложения."""
+    """Store and manage application state."""
     def __init__(self):
         self.current_location_data = {}
         self.location_history = deque(maxlen=3)
@@ -13,12 +13,12 @@ class AppState:
         self.base_tooltip_text = ""
 
     def update_location(self, new_data):
-        """Обновляет данные о местоположении и историю."""
+        """Update location data and history."""
         current_ip = new_data.get('ip')
         if not current_ip:
             return
 
-        # Обновляем историю, только если IP действительно изменился
+        # Update history only if IP actually changed
         if self.last_known_external_ip != current_ip:
             if self.current_location_data: # Добавляем предыдущее состояние в историю
                 self.location_history.append(self.current_location_data)
@@ -27,11 +27,11 @@ class AppState:
         self.current_location_data = new_data
 
     def set_idle_mode(self, status: bool):
-        """Устанавливает флаг экономного режима."""
+        """Set idle mode flag."""
         self.is_in_idle_mode = status
 
     def clear_network_state(self):
-        """Сбрасывает сетевое состояние при потере соединения."""
+        """Reset network state after connection loss."""
         self.last_known_external_ip = "N/A"
         self.base_tooltip_text = ""
-        # self.current_location_data можно не сбрасывать, чтобы сохранить последние данные
+        # self.current_location_data # You can keep the current location data without resetting

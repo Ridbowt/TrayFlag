@@ -1,4 +1,5 @@
 # File: src/idle_detector.py
+
 try:
     import win32api
     from pycaw.pycaw import AudioUtilities

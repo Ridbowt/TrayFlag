@@ -1,16 +1,17 @@
 # File: src/utils.py
+
 import sys
 import os
 import re
 from PySide6 import QtWidgets, QtGui, QtCore
-from constants import APP_NAME # <-- ИЗМЕНЕНО
+from constants import APP_NAME
 
 def get_base_path():
     """
-    Возвращает правильный базовый путь для .py и для скомпилированного .exe.
+    Returns the base path of the application
     """
-    #return os.path.abspath(os.path.join(os.path.dirname(__file__), '..')) # <--- ПРИ ЗАПУСКЕ ИЗ .PY СКРИПТА
-    return os.path.dirname(os.path.abspath(__file__)) # <--- ПРИ ЗАПУСКЕ ИЗ .EXE ПРИЛОЖЕНИЯ
+    #return os.path.abspath(os.path.join(os.path.dirname(__file__), '..')) # <--- WHEN RUNNING FROM A .PY SCRIPT
+    return os.path.dirname(os.path.abspath(__file__)) # <--- WHEN RUNNING FROM THE .EXE APPLICATION
 
 def resource_path(relative_path):
     return os.path.join(get_base_path(), relative_path)
@@ -76,9 +77,9 @@ def create_no_internet_icon(size=20):
 
 def create_desktop_shortcut():
     """
-    Создает ярлык для приложения на рабочем столе, если его еще нет.
+    Creates a desktop shortcut for the application if it doesn't exist
     """
-    # Эта функция будет работать только на Windows
+    # This function is only for Windows
     if sys.platform != 'win32':
         return
 
@@ -90,25 +91,25 @@ def create_desktop_shortcut():
         
     shell = win32com.client.Dispatch("WScript.Shell")
     
-    # Получаем путь к рабочему столу текущего пользователя
+    # Get the path to the user's desktop
     desktop_folder = shell.SpecialFolders("Desktop")
     shortcut_path = os.path.join(desktop_folder, f"{APP_NAME}.lnk")
     
-    # Проверяем, не существует ли уже ярлык
+    # Check if the shortcut already exists
     if os.path.exists(shortcut_path):
         print(f"Desktop shortcut already exists at: {shortcut_path}")
         return
 
-    # Получаем путь к нашему скомпилированному .exe
+    # Get the path to our compiled .exe
     main_exe_path = resource_path(f"{APP_NAME}.exe")
     
-    # Создаем объект ярлыка и настраиваем его свойства
+    # Create a shortcut object and configure its properties
     shortcut = shell.CreateShortCut(shortcut_path)
     shortcut.TargetPath = main_exe_path
     shortcut.IconLocation = resource_path(os.path.join("assets", "icons", "logo.ico"))
     shortcut.Description = f"Launch {APP_NAME}"
     shortcut.WorkingDirectory = get_base_path()
     
-    # Сохраняем ярлык
+    # Save the shortcut
     shortcut.save()
     print(f"Desktop shortcut created at: {shortcut_path}")

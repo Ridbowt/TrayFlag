@@ -1,4 +1,6 @@
+# File: src/constants.py
+
 APP_NAME = "TrayFlag"
-ORG_NAME = "YourCompany"
-__version__ = "1.11.2"
-RELEASE_DATE = "2025-08-19"
+ORG_NAME = "https://github.com/Ridbowt/TrayFlag"
+__version__ = "1.12.0"
+RELEASE_DATE = "2025-09-07"

@@ -4,13 +4,13 @@ chcp 65001 > nul
 echo --- Building Rust utility (ip_lookup.exe) ---
 
 echo Adding Cargo to PATH for this session...
-rem Используем %USERPROFILE% чтобы путь был универсальным для любого пользователя
+rem Use %USERPROFILE% so that the path is universal for any user
 set "PATH=%PATH%;%USERPROFILE%\.cargo\bin"
 
-rem 1. Переходим в папку с Rust-проектом
+rem 1. Go to the folder with the Rust project
 pushd rust_ip_lookup_cli
 
-rem 2. Собираем проект в релизном режиме
+rem 2. Build the project in release mode
 echo Compiling...
 cargo build --release
 
@@ -22,13 +22,13 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-rem 3. Возвращаемся в корневую папку проекта
+rem 3. Return to the root project folder
 popd
 
 echo Copying executable to 'src' folder...
 
-rem 4. Копируем результат из папки target/release в папку src Python-проекта,
-rem    одновременно переименовывая его в ip_lookup.exe
+rem 4. Copy the result from the target/release folder to the src folder of the Python project,
+rem    simultaneously renaming it to ip_lookup.exe
 copy /Y rust_ip_lookup_cli\target\release\rust_ip_lookup_cli.exe src\ip_lookup.exe
 
 if %errorlevel% neq 0 (
