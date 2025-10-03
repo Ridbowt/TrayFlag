@@ -36,13 +36,31 @@ class UpdateHandler(QtCore.QObject):
         """Checks if the user has woken up from idle mode."""
         if not self.state.is_in_idle_mode:
             return
-        if not idle_detector.is_user_idle(self.config.idle_threshold_mins * 60):
+
+        threshold_mins = self.config.idle_threshold_mins
+
+        # "Easter egg" for debugging: if 0 is selected, use 5 seconds
+        if threshold_mins == 0:
+            threshold_seconds = 5
+        else:
+            threshold_seconds = threshold_mins * 60
+
+        if not idle_detector.is_user_idle(threshold_seconds):
             self.exit_idle_mode()
 
     def main_update_loop(self):
         """Main update loop, called every time the main timer fires."""
         if self.config.idle_enabled and not self.state.is_in_idle_mode:
-            if idle_detector.is_user_idle(self.config.idle_threshold_mins * 60):
+
+            threshold_mins = self.config.idle_threshold_mins
+            
+            # "Easter egg" for debugging: if 0 is selected, use 5 seconds
+            if threshold_mins == 0:
+                threshold_seconds = 5
+            else:
+                threshold_seconds = threshold_mins * 60
+
+            if idle_detector.is_user_idle(threshold_seconds):
                 self.enter_idle_mode()
                 return
         self.update_location_icon()

@@ -108,16 +108,21 @@ class App(QtWidgets.QSystemTrayIcon):
         full_data = ip_data.get('full_data', {})
         ip_has_changed = (current_ip != self.state.last_known_external_ip)
 
-        if ip_has_changed:
-            print(f"[SUCCESS] IP address has changed: {self.state.last_known_external_ip} -> {current_ip}")
-        
+        # Main condition: update everything if the IP has changed OR this is a manual launch
         if ip_has_changed or is_forced:
+            # Log only if the IP has actually changed
+            if ip_has_changed:
+                print(f"[SUCCESS] IP address has changed: {self.state.last_known_external_ip} -> {current_ip}")
+            
+            # Update the state
             if full_data:
                 self.state.update_location(full_data)
             else:
                 self.state.update_location({'ip': current_ip, 'country_code': '??', 'city': 'N/A', 'isp': 'N/A'})
+            
+            # And immediately update the GUI
             self.update_gui_with_new_data()
-
+            
     @QtCore.Slot()
     def on_entered_idle_mode(self):
         """This slot is called when the application enters power-saving mode."""

@@ -208,7 +208,7 @@ class SettingsDialog(QtWidgets.QDialog):
         self.idle_options_widget = QtWidgets.QWidget()
         idle_form_layout = QtWidgets.QFormLayout(self.idle_options_widget)
         self.idle_threshold_spinbox = QtWidgets.QSpinBox()
-        self.idle_threshold_spinbox.setMinimum(1); self.idle_threshold_spinbox.setMaximum(120); self.idle_threshold_spinbox.setSuffix(f" {self.tr.get('minutes')}")
+        self.idle_threshold_spinbox.setMinimum(0); self.idle_threshold_spinbox.setMaximum(120); self.idle_threshold_spinbox.setSuffix(f" {self.tr.get('minutes')}")
         self.idle_threshold_spinbox.setValue(current_config.idle_threshold_mins)
         idle_form_layout.addRow(self.tr.get("settings_idle_threshold"), self.idle_threshold_spinbox)
         self.idle_interval_spinbox = QtWidgets.QSpinBox()
