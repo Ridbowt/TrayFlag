@@ -40,3 +40,9 @@ Found a bug or have an idea for a new feature? Feel free to open a new issue in 
 
 ---
 *This application was created by an enthusiast with significant support and consultation from AI assistants (Gemini, ChatGPT).*
+
+---
+## Support ❤️
+
+If you like TrayFlag and want to support its development, you can do it via Boosty:  
+[Support on Boosty](https://boosty.to/trayflag) 💛
