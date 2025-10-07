@@ -41,6 +41,11 @@ Found a bug or have an idea for a new feature? Feel free to open a new issue in 
 ---
 *This application was created by an enthusiast with significant support and consultation from AI assistants (Gemini, ChatGPT).*
 
+## Connect 📢
+
+Stay updated and follow TrayFlag on Telegram:  
+[TrayFlag Channel](https://t.me/trayflag) 📲
+
 ---
 ## Support ❤️
 
