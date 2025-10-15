@@ -19,7 +19,7 @@ if not exist "src\ip_lookup.exe" (
     exit /b 1
 )
 
-python -m nuitka --standalone --output-filename=TrayFlag.exe --output-dir=TrayFlag --remove-output --windows-console-mode=disable --enable-plugin=pyside6 --windows-icon-from-ico=assets/icons/logo.ico --include-data-dir=assets=assets --include-package=soundfile,sounddevice,win32com,win32api,win32con,pycaw --include-data-file=src/ip_lookup.exe=ip_lookup.exe src/main.py
+python -m nuitka --standalone --output-filename=TrayFlag.exe --output-dir=TrayFlag --remove-output --windows-console-mode=disable --enable-plugin=pyside6 --windows-icon-from-ico=assets/icons/logo.ico --include-data-dir=assets=assets --include-package=soundfile,sounddevice,win32com,win32api,win32con,pycaw --include-data-file=src/ip_lookup.exe=ip_lookup.exe --include-data-file=updater.ps1=updater.ps1 src/main.py
 
 if %errorlevel% neq 0 (
     echo.

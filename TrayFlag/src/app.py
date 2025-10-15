@@ -5,7 +5,7 @@ import webbrowser
 import time
 from PySide6 import QtWidgets, QtGui, QtCore
 
-from utils import resource_path, create_no_internet_icon, set_autostart_shortcut, truncate_text, clean_isp_name, create_desktop_shortcut
+from utils import resource_path, create_no_internet_icon, set_autostart_shortcut, truncate_text, clean_isp_name, create_desktop_shortcut, run_updater_script
 from config import ConfigManager, SETTINGS_FILE_PATH
 from constants import __version__, RELEASE_DATE
 from translator import Translator, get_initial_language_code
@@ -224,7 +224,7 @@ class App(QtWidgets.QSystemTrayIcon):
     def open_about_dialog(self):
         if self.about_dialog and self.about_dialog.isVisible():
             self.about_dialog.raise_(); self.about_dialog.activateWindow(); return
-        self.about_dialog = AboutDialog(self.app_icon, self.tr, __version__, RELEASE_DATE, self.about_logo_pixmap, None)
+        self.about_dialog = AboutDialog(self, self.app_icon, self.tr, __version__, RELEASE_DATE, self.about_logo_pixmap, None)
         self.about_dialog.exec()
 
     def on_activated(self, reason):
@@ -273,3 +273,7 @@ class App(QtWidgets.QSystemTrayIcon):
 
     def open_dns_leak_test_website(self):
         webbrowser.open('https://ipleak.net/')
+
+    def run_updater(self):
+        """Simply calls the launcher function from utils."""
+        run_updater_script()

@@ -92,6 +92,12 @@ BUTTON_PALETTES = {
         "hover": "#5599bb",
         "pressed": "#337799",
         "border": "#337799"
+    },
+    "update": {
+        "bg": "#28A745",      # Nice green
+        "hover": "#218838",   # Slightly darker on hover
+        "pressed": "#1E7E34", # Even darker when pressed
+        "border": "#28A745"
     }
 }
 

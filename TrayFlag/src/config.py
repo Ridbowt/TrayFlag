@@ -25,7 +25,7 @@ class ConfigManager:
         self.settings.setValue(f"{APP_NAME}/version", __version__)
         
         # Section [main]
-        self.settings.setValue("main/language", "") # Пусто, чтобы определился язык системы
+        self.settings.setValue("main/language", "") # Empty, to let the system language be detected
         self.settings.setValue("main/autostart", False)
         self.settings.setValue("main/notifications", True)
         self.settings.setValue("main/sound", True)

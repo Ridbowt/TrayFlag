@@ -4,12 +4,13 @@ import os
 import webbrowser
 from PySide6 import QtWidgets, QtGui, QtCore
 from utils import resource_path
-from constants import APP_NAME
+from constants import APP_NAME, LINK_COLOR
 import themes
 
 class AboutDialog(QtWidgets.QDialog):
-    def __init__(self, app_icon, tr, version, release_date, logo_pixmap, parent=None):
+    def __init__(self, app, app_icon, tr, version, release_date, logo_pixmap, parent=None):
         super().__init__(parent)
+        self.app = app
         self.setObjectName("aboutDialog")
         self.setStyleSheet(themes.get_about_dialog_style())
         self.tr = tr
@@ -40,14 +41,34 @@ class AboutDialog(QtWidgets.QDialog):
         
         version_label = QtWidgets.QLabel(self.tr.get("about_version", version=version, release_date=release_date))
         
-        website_label = QtWidgets.QLabel(f'⭐ <a href="https://github.com/Ridbowt/TrayFlag">{self.tr.get("about_website")}</a>')
+        website_label = QtWidgets.QLabel(f'⭐ <a href="https://github.com/Ridbowt/TrayFlag" style="color: {LINK_COLOR};">{self.tr.get("about_website")}</a>')
+        website_label.setOpenExternalLinks(True)
         website_label.setOpenExternalLinks(True)
 
-        telegram_label = QtWidgets.QLabel(f'✈️ <a href="https://t.me/trayflag">{self.tr.get("about_telegram")}</a>')
+        telegram_label = QtWidgets.QLabel(f'✈️ <a href="https://t.me/trayflag" style="color: {LINK_COLOR};">{self.tr.get("about_telegram")}</a>')
+        telegram_label.setOpenExternalLinks(True)
         telegram_label.setOpenExternalLinks(True)
 
         title_layout.addWidget(title_label)
-        title_layout.addWidget(version_label)
+
+        # Create a horizontal container for the version and button
+        version_layout = QtWidgets.QHBoxLayout()
+
+        # Version text
+        version_label = QtWidgets.QLabel(self.tr.get("about_version", version=version, release_date=release_date))
+
+        # "Check for Updates" button
+        update_button = QtWidgets.QPushButton(self.tr.get("about_check_for_updates"))
+        update_button.setStyleSheet(themes.get_button_style("update"))
+        update_button.clicked.connect(self.app.run_updater) # <-- Bind to a future function
+        
+        version_layout.addWidget(version_label)
+        version_layout.addStretch() # "Spacer"
+        version_layout.addWidget(update_button)
+        
+        # Add the container to the main layout
+        title_layout.addLayout(version_layout)
+
         title_layout.addWidget(website_label)
         title_layout.addWidget(telegram_label)
         title_layout.addStretch()
@@ -69,7 +90,11 @@ class AboutDialog(QtWidgets.QDialog):
         ack_keys = ['ip_services', 'flags', 'app_icon', 'logo_builder', 'sound', 'code', 'ai']
         line_color = "#606060"
         for i, key in enumerate(ack_keys):
-            line_label = QtWidgets.QLabel(self.tr.get(f'ack_{key}'))
+            # Get the "raw" HTML from a .json file
+            raw_html = self.tr.get(f'ack_{key}')
+            # "Inject" our style into every <a> tag
+            styled_html = raw_html.replace('<a href', f'<a style="color: {LINK_COLOR};" href')
+            line_label = QtWidgets.QLabel(styled_html) # "Inject" our style into every <a> tag
             line_label.setTextFormat(QtCore.Qt.TextFormat.RichText)
             line_label.setOpenExternalLinks(True)
             line_label.setWordWrap(True)

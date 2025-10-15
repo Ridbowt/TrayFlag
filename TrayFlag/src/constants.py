@@ -2,5 +2,6 @@
 
 APP_NAME = "TrayFlag"
 ORG_NAME = "https://github.com/Ridbowt/TrayFlag"
-__version__ = "1.12.1"
-RELEASE_DATE = "2025-10-03"
+LINK_COLOR = "#6CB6FF"
+__version__ = "1.13.0"
+RELEASE_DATE = "2025-10-15"

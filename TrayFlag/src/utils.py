@@ -3,6 +3,8 @@
 import sys
 import os
 import re
+import shutil
+import subprocess
 from PySide6 import QtWidgets, QtGui, QtCore
 from constants import APP_NAME
 
@@ -113,3 +115,26 @@ def create_desktop_shortcut():
     # Save the shortcut
     shortcut.save()
     print(f"Desktop shortcut created at: {shortcut_path}")
+
+# File: src/utils.py
+
+def run_updater_script():
+    """
+    Finds and runs the updater.ps1 script, giving preference to PowerShell 7.
+    """
+    updater_path = resource_path("updater.ps1")
+    if not os.path.exists(updater_path):
+        print(f"[ERROR] updater.ps1 not found at: {updater_path}")
+        # You can show a QMessageBox with an error here if needed
+        return
+
+    # Ищем pwsh.exe (PowerShell 7+)
+    pwsh_path = shutil.which("pwsh")
+    
+    if pwsh_path:
+        command = [pwsh_path, "-ExecutionPolicy", "Bypass", "-File", updater_path]
+    else:
+        command = ["powershell", "-ExecutionPolicy", "Bypass", "-File", updater_path]
+    
+    # Run in a new console
+    subprocess.Popen(command, creationflags=subprocess.CREATE_NEW_CONSOLE)
