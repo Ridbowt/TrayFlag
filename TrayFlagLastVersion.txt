@@ -1,3 +1,3 @@
-VER: 1.13.0
-LINK: https://github.com/Ridbowt/TrayFlag/releases/download/v1.13.0/TrayFlag_v1.13.0_win-x64.zip
-HASH: 771244AA59ED867E571F3A07D6585C7B7A2915C8586D50FCDB9B62648D1EC9D3
+VER: 1.13.1
+LINK: https://github.com/Ridbowt/TrayFlag/releases/download/v1.13.1/TrayFlag_v1.13.1_win-x64.zip
+HASH: 705dba967bd11a1d1540eba875d4b950c5b1c73c498c1e98f21993560fd6ffbd
