@@ -266,7 +266,7 @@ class App(QtWidgets.QSystemTrayIcon):
 
     def open_weblink(self):
         if self.state.current_location_data and 'ip' in self.state.current_location_data:
-            webbrowser.open(f"https.www.ip-tracker.org/lookup.php?ip={self.state.current_location_data['ip']}")
+            webbrowser.open(f"https://www.ip-tracker.org/lookup.php?ip={self.state.current_location_data['ip']}")
 
     def open_speedtest_website(self):
         webbrowser.open('https://www.speedtest.net')

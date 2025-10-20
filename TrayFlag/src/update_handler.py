@@ -38,14 +38,13 @@ class UpdateHandler(QtCore.QObject):
             return
 
         threshold_mins = self.config.idle_threshold_mins
+        threshold_seconds = 5 if threshold_mins == 0 else threshold_mins * 60
 
-        # "Easter egg" for debugging: if 0 is selected, use 5 seconds
-        if threshold_mins == 0:
-            threshold_seconds = 5
-        else:
-            threshold_seconds = threshold_mins * 60
+        # Check ONLY for basic mouse/keyboard input
+        is_input_idle = idle_detector.get_idle_time_seconds() < threshold_seconds
 
-        if not idle_detector.is_user_idle(threshold_seconds):
+        # WAKE UP only if there IS input activity
+        if is_input_idle:
             self.exit_idle_mode()
 
     def main_update_loop(self):
