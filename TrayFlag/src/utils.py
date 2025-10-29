@@ -116,8 +116,6 @@ def create_desktop_shortcut():
     shortcut.save()
     print(f"Desktop shortcut created at: {shortcut_path}")
 
-# File: src/utils.py
-
 def run_updater_script():
     """
     Finds and runs the updater.ps1 script, giving preference to PowerShell 7.

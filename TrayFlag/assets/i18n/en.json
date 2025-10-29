@@ -14,7 +14,6 @@
     "menu_ip_wait": "💻 IP: waiting...",
     "menu_city_wait": "📍 City: waiting...",
     "menu_isp_wait": "🏢 Provider: waiting...",
-    "menu_copy_ip": "📋 Copy IP Address",
     "menu_update_now": "🔄 Update Now",
     "menu_history": "📜 History",
     "menu_history_empty": "History is empty",
@@ -76,7 +75,8 @@
     "button_yes": "Yes",
     "button_no": "No",
 
-    "about_check_for_updates": "🚀 Check for Updates...",
+    "about_check_for_updates": "🪄 Check for Updates...",        
+    "menu_check_for_updates": "🪄 Check for Updates...",
 
     "about_tab_acknowledgements": "🛠️ Acknowledgements",
     "about_tab_sponsors": "❤️ Sponsors",

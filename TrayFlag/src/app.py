@@ -257,23 +257,33 @@ class App(QtWidgets.QSystemTrayIcon):
             self.copy_text_to_clipboard(self.state.current_location_data['ip'])
 
     def copy_historical_ip(self, ip_to_copy):
+        print(f"[ACTION] Copied historical IP to clipboard: '{ip_to_copy}'")
         self.copy_text_to_clipboard(ip_to_copy)
     
     def copy_text_to_clipboard(self, text):
+        print(f"[ACTION] Copied to clipboard: '{text}'")
         QtWidgets.QApplication.clipboard().setText(text)
         if self.config.notifications:
             self.showMessage(self.tr.get("copied_title"), self.tr.get("copied_message_simple", text=text), self.icon(), 2000)
 
     def open_weblink(self):
         if self.state.current_location_data and 'ip' in self.state.current_location_data:
-            webbrowser.open(f"https://www.ip-tracker.org/lookup.php?ip={self.state.current_location_data['ip']}")
+            url = f"https://www.ip-tracker.org/lookup.php?ip={self.state.current_location_data['ip']}"
+            print(f"[ACTION] Opening URL in browser: {url}")
+            webbrowser.open(url)
 
     def open_speedtest_website(self):
-        webbrowser.open('https://www.speedtest.net')
+        url = 'https://www.speedtest.net'
+        print(f"[ACTION] Opening URL in browser: {url}")
+        webbrowser.open(url)
 
     def open_dns_leak_test_website(self):
-        webbrowser.open('https://ipleak.net/')
+        url = 'https://ipleak.net/'
+        print(f"[ACTION] Opening URL in browser: {url}")
+        webbrowser.open(url)
+
 
     def run_updater(self):
         """Simply calls the launcher function from utils."""
+        print("[ACTION] 'Check for Updates' clicked. Running updater script...")
         run_updater_script()
