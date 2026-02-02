@@ -4,7 +4,7 @@ import random
 import threading
 from PySide6 import QtCore
 
-from ip_fetcher import get_ip_data_from_rust
+from ip_fetcher import get_ip_data, get_full_data
 import idle_detector
 
 class UpdateHandler(QtCore.QObject):
@@ -102,5 +102,34 @@ class UpdateHandler(QtCore.QObject):
             self.schedule_next_update()
 
     def _update_location_task(self, is_forced):
-        ip_data = get_ip_data_from_rust()
-        self.ipDataReceived.emit(ip_data, is_forced)
+        ip_data = get_ip_data()  # str или dict
+        ip = None
+
+        if isinstance(ip_data, dict):
+            ip = ip_data.get('ip', 'N/A')
+        elif isinstance(ip_data, str):
+            ip = ip_data
+        else:
+            ip = 'N/A'
+
+        last_ip = getattr(self.state, 'last_known_ip', None)
+
+        # Нет сети
+        if ip == 'N/A':
+            print("[ERROR] Could not retrieve external IP.")
+            self.state.last_known_ip = None
+            self.ipDataReceived.emit({'ip': 'N/A', 'full_data': {'error': 'No connection'}}, is_forced)
+            return
+
+        # Always emit the signal on a forced update (exiting idle)
+        if is_forced or last_ip is None or ip != last_ip:
+            print(f"[SUCCESS] IP address update: {last_ip} -> {ip}")
+            full_data = get_full_data(ip)
+            self.state.last_known_ip = ip
+            self.ipDataReceived.emit(full_data, is_forced)
+        else:
+            print("IP has not changed, but forced update or normal check.")
+            # If forced (exiting idle), still update the icon
+            if is_forced:
+                full_data = get_full_data(ip)
+                self.ipDataReceived.emit(full_data, is_forced)

@@ -9,6 +9,7 @@ class AppState:
         self.location_history = deque(maxlen=3)
         self.last_known_external_ip = ""
         self.is_in_idle_mode = False
+        self.last_known_ip = None
         self.last_update_time = 0
         self.base_tooltip_text = ""
 
