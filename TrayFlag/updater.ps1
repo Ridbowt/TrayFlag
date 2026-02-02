@@ -1,6 +1,6 @@
 <#
     File: updater.ps1
-    Version: 0.1.1
+    Version: 0.1.0
     Author: Ridbowt
     Description: Downloads and installs the latest version of TrayFlag.
 #>
@@ -42,24 +42,30 @@ try {
     $currentVersionLine = $iniContent | Select-String -Pattern "version="
     $currentVersion = ($currentVersionLine.Line -replace "version=", "").Trim()
 
+    # --- Download the File and split it into lines ---
     $headers = @{ "Cache-Control" = "no-cache"; "Pragma" = "no-cache" }
     if ($PSVersionTable.PSVersion.Major -ge 7) {
+        # PS7
         $gistContent = (Invoke-WebRequest -Uri $GistRawUrl -Headers $headers).Content
     } else {
+        # PS5: use UseBasicParsing
         $gistContent = (Invoke-WebRequest -Uri $GistRawUrl -Headers $headers -UseBasicParsing).Content
     }
     $gistLines = $gistContent -split "`r?`n"
 
+    # --- Find the latest version ---
     $latestVersionLine = $gistLines | Where-Object { $_ -match "^VER[:=]" } | Select-Object -First 1
     if (-not $latestVersionLine) { throw "Cannot find version info in Gist." }
     Write-Host "Latest version line raw:" $latestVersionLine
     $latestVersion = ($latestVersionLine -replace "VER[:=]", "").Trim()
     if (-not $latestVersion) { throw "Could not determine latest version. Check the Gist content." }
 
+    # --- Find the download link ---
     $zipUrlLine = $gistLines | Where-Object { $_ -match "^LINK[:=]" } | Select-Object -First 1
     if (-not $zipUrlLine) { throw "Cannot find download link in Gist." }
     $zipUrl = ($zipUrlLine -replace "LINK[:=]", "").Trim()
 
+    # --- Find the hash ---
     $hashLine = $gistLines | Where-Object { $_ -match "^HASH[:=]" } | Select-Object -First 1
     if (-not $hashLine) { throw "Cannot find HASH info in Gist." }
     $hashFromGist = ($hashLine -replace "HASH[:=]", "").Trim()
@@ -89,8 +95,9 @@ try {
     Stop-Process -Name "TrayFlag" -Force
     Start-Sleep -Seconds 2
 
-    # --- Step 4: Download the update ---
+    # --- Step 4: Download and Update ---
     Write-Host "[4/5] Downloading and installing update..." -ForegroundColor Cyan
+    
     $zipPath = Join-Path $trayflagDir "TrayFlag_update.zip"
     Invoke-WebRequest -Uri $zipUrl -OutFile $zipPath
 
@@ -100,33 +107,29 @@ try {
         throw "Downloaded file hash mismatch! Update aborted."
     }
 
-    # --- Clear old files except TrayFlag.ini ---
-    Get-ChildItem -Path $trayflagDir -Recurse | Where-Object {
-        $_.FullName -ne $iniPath
-    } | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
-
-    # --- Extract and copy new files ---
+    # --- Extract and Copy ---
     $tempDir = Join-Path $trayflagDir "update_temp"
     if (Test-Path $tempDir) { Remove-Item $tempDir -Recurse -Force }
     New-Item -ItemType Directory -Path $tempDir -Force
-
+    
     Expand-Archive -Path $zipPath -DestinationPath $tempDir -Force
-
+    
     $unpackedDir = Get-ChildItem -Path $tempDir | Where-Object { $_.PSIsContainer } | Select-Object -First 1
     $sourceDir = $unpackedDir.FullName
 
+    # --- Copy only the contents ---
     Get-ChildItem -Path $sourceDir | ForEach-Object {
         Copy-Item -Path $_.FullName -Destination $trayflagDir -Recurse -Force
     }
 
-    # --- Cleanup temporary files ---
+    # --- Delete the temporary folder and ZIP ---
     Remove-Item $zipPath -Force
     Remove-Item $tempDir -Recurse -Force
 
     # --- Step 5: Launch the new version ---
     Write-Host "[5/5] Starting new version..." -ForegroundColor Cyan
     Start-Process (Join-Path $trayflagDir "TrayFlag.exe")
-
+    
     Write-Host ""
     Write-Host "Update successful! This window will close in 5 seconds." -ForegroundColor Green
     Start-Sleep -Seconds 5
