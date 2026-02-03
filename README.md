@@ -51,3 +51,5 @@ Stay updated and follow TrayFlag on Telegram:
 
 If you like TrayFlag and want to support its development, you can do it via Boosty:  
 [Support on Boosty](https://boosty.to/trayflag) 💛
+
+<sub>geolocation tool, country flag, tray flag, ip flag checker, show my ip, windows tray ip, current ip location, ip notifier, external ip tracker, flag indicator</sub>
