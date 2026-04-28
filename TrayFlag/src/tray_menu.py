@@ -49,10 +49,11 @@ class TrayMenuManager:
                 self.ip_action, self.city_action, self.isp_action,
                 None,
                 # Group 2: IP Actions
-                self.history_menu, self.weblink_action,
+                #self.history_menu,
+                self.force_update_action,
                 None,
                 # Group 3: Diagnostic Tools
-                self.force_update_action, self.speedtest_action, self.dns_leak_action,
+                self.weblink_action, self.speedtest_action, self.dns_leak_action,
                 None,
                 # Group 4: Application
                 self.settings_action, self.update_action, self.about_action,

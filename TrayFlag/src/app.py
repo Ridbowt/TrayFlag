@@ -3,6 +3,8 @@
 import os
 import webbrowser
 import time
+import threading
+import requests
 from PySide6 import QtWidgets, QtGui, QtCore
 
 from utils import resource_path, create_no_internet_icon, set_autostart_shortcut, truncate_text, clean_isp_name, create_desktop_shortcut, run_updater_script
@@ -16,9 +18,16 @@ from state_manager import AppState
 from update_handler import UpdateHandler
 
 class App(QtWidgets.QSystemTrayIcon):
+
+    updateAvailable = QtCore.Signal(str, str) # (version, link)
+
     def __init__(self):
         super().__init__()
-        
+
+        self.update_checked = False
+
+        self.updateAvailable.connect(self.on_update_available)
+
         # --- 1. Initialization of Managers ---
         self.config = ConfigManager()
         self.state = AppState()
@@ -27,6 +36,11 @@ class App(QtWidgets.QSystemTrayIcon):
         
         self.settings_dialog = None
         self.about_dialog = None
+
+        #self.update_checked = False
+
+        self.new_version_str = ""
+        self.new_version_link = ""
 
         # --- 2. Create and Configure UpdateHandler ---
         self.update_handler = UpdateHandler(self.config, self.state)
@@ -54,6 +68,12 @@ class App(QtWidgets.QSystemTrayIcon):
         QtCore.QTimer.singleShot(100, self._handle_first_launch_tasks)
         self.update_handler.start()
 
+        # Run the first update check 10 seconds after startup
+        QtCore.QTimer.singleShot(10000, self.try_check_updates)
+
+        # Запуск таймера для проверки каждые 72 часа
+        threading.Thread(target=self._update_timer_thread, daemon=True).start()
+
     def _handle_first_launch_tasks(self):
         if self.config.shortcut_prompted: return
         dialog = CustomQuestionDialog(
@@ -72,7 +92,12 @@ class App(QtWidgets.QSystemTrayIcon):
         self.tr.load_language(lang_code)
 
     @QtCore.Slot(object, bool)
-    def on_ip_data_received(self, ip_data, is_forced):      
+    def on_ip_data_received(self, ip_data, is_forced):
+        # If the check has not been performed yet (for example, there was no network at startup),
+        # run it now when the IP has been successfully obtained.
+        if not self.update_checked:
+            self.try_check_updates()
+
         # 1. Check for network access error
         if not ip_data or ip_data.get('ip') == "N/A":
 
@@ -130,6 +155,8 @@ class App(QtWidgets.QSystemTrayIcon):
         self.setToolTip(self.tr.get("idle_mode_tooltip"))
 
     def update_gui_with_new_data(self):
+        if self.state.is_in_idle_mode:
+            return
         data = self.state.current_location_data
         country_code = data.get('country_code', '')
         icon = self._load_icon(f"{country_code}.png", "flags")
@@ -140,7 +167,7 @@ class App(QtWidgets.QSystemTrayIcon):
                         f"{country_code.upper()}\n"
                         f"{truncate_text(data.get('city', 'N/A'), 17)}\n"
                         f"{truncate_text(clean_isp_name(data.get('isp', 'N/A')), 17)}\n"
-                        f"({self.tr.get('tooltip_updated_at', time=update_time_str)})")
+                        f"{self.tr.get('tooltip_updated_at', time=update_time_str)}")
         self.setToolTip(tooltip_text)
         
         self.menu_manager.update_menu_content()
@@ -220,7 +247,107 @@ class App(QtWidgets.QSystemTrayIcon):
         self.menu_manager = TrayMenuManager(self)
         self.setContextMenu(self.menu_manager.menu)
         if self.state.current_location_data: self.menu_manager.update_menu_content()
+        # --- НАЧАЛО ИЗМЕНЕНИЙ ---
+        if self.state.is_in_idle_mode:
+            # Если программа спит, принудительно обновляем текст тултипа на новом языке
+            self.on_entered_idle_mode()
+        elif self.state.last_known_external_ip == "N/A":
+            # Если сети нет, восстанавливаем иконку ошибки и текст
+            self.setIcon(self.no_internet_icon)
+            self.setToolTip(self.tr.get("tooltip_error_get_ip"))
+        # --- КОНЕЦ ИЗМЕНЕНИЙ ---
+        # If update was already found earlier, re-apply it in new language
+        if self.new_version_str:
+            self.on_update_available(self.new_version_str, self.new_version_link)
+        # Принудительно проверяем обновления после смены языка
+        self.try_check_updates(force=True)
 
+
+    def try_check_updates(self, force=False):
+        """
+        Runs the update check in a background thread.
+        """
+        if not force:
+            print("[DEBUG] Update check triggered (force=False)")
+        else:
+            print("[DEBUG] Update check triggered (force=True)")
+
+        if self.update_checked and not force:
+            return
+
+        self.update_checked = True
+        print("[DEBUG] Starting background task for update check...")
+        threading.Thread(
+            target=self._check_updates_worker,
+            daemon=True
+        ).start()
+
+    def _update_timer_thread(self):
+        """Фоновый поток, проверяющий обновления каждые 72 часа."""
+        interval_sec = 72 * 60 * 60  # 72 часа
+        while True:
+            # Запускаем проверку
+            self.try_check_updates(force=True)
+            # Ждём interval_sec секунд
+            for _ in range(int(interval_sec)):
+                time.sleep(1)
+                # Можно прервать поток по условию, если понадобится
+
+
+
+    def _check_updates_worker(self):
+        """
+        Runs in a background thread. Downloads, parses, and compares versions.
+        """
+        try:
+            url = "https://raw.githubusercontent.com/Ridbowt/TrayFlag/main/TrayFlagLastVersion.txt"
+            response = requests.get(url, timeout=15)
+            response.raise_for_status() # Will raise an error if the status is not 200 OK
+            
+            content = response.text
+            
+            # Parse the file
+            latest_version = None
+            download_link = None
+            for line in content.splitlines():
+                if line.startswith("VER:"):
+                    latest_version = line.replace("VER:", "").strip()
+                elif line.startswith("LINK:"):
+                    download_link = line.replace("LINK:", "").strip()
+
+            if not latest_version or not download_link:
+                print("[DEBUG] Update check: Failed to parse version file.")
+                return
+
+            # Compare versions
+            # Simple function to compare "1.10.0" > "1.9.0"
+            def parse_ver(v_str):
+                return tuple(map(int, (v_str.split("."))))
+
+            if parse_ver(latest_version) > parse_ver(__version__):
+                print(f"[DEBUG] New version found: {latest_version}")
+                self.updateAvailable.emit(latest_version, download_link)
+
+        except Exception as e:
+            print(f"[DEBUG] Update check failed: {e}")
+
+    @QtCore.Slot(str, str)
+    def on_update_available(self, version, link):
+        """
+        Called when a new version is found. Updates the menu item.
+        """
+        print(f"[DEBUG] New version {version} found. Updating menu item.")
+        
+        # Save information about the new version
+        self.new_version_str = version
+        self.new_version_link = link
+        
+        # Находим наш QAction в объекте меню
+        update_action = self.menu_manager.update_action
+        
+        # Change the text
+        update_action.setText(self.tr.get("menu_update_available", version=version))
+        
     def open_about_dialog(self):
         if self.about_dialog and self.about_dialog.isVisible():
             self.about_dialog.raise_(); self.about_dialog.activateWindow(); return

@@ -1,3 +1,5 @@
+rem "F:\Scripts\Python\TrayFlag\build_python.bat"
+
 @echo off
 chcp 65001 > nul
 
@@ -10,16 +12,21 @@ if exist "build" rmdir /s /q build
 echo.
 echo Compiling with Nuitka...
 
-rem Check that ip_lookup.exe is in place
-if not exist "src\ip_lookup.exe" (
-    echo.
-    echo ERROR: ip_lookup.exe not found in 'src' folder.
-    echo Please run build_rust.bat first to compile it.
-    pause
-    exit /b 1
-)
+rem --- УДАЛЕНА ПРОВЕРКА НА ip_lookup.exe ---
 
-python -m nuitka --standalone --output-filename=TrayFlag.exe --output-dir=TrayFlag --remove-output --windows-console-mode=disable --enable-plugin=pyside6 --windows-icon-from-ico=assets/icons/logo.ico --include-data-dir=assets=assets --include-package=soundfile,sounddevice,win32com,win32api,win32con,pycaw --include-data-file=src/ip_lookup.exe=ip_lookup.exe --include-data-file=updater.ps1=updater.ps1 src/main.py
+python -m nuitka ^
+    --standalone ^
+    --output-filename=TrayFlag.exe ^
+    --output-dir=TrayFlag ^
+    --remove-output ^
+    --windows-console-mode=disable ^
+    --enable-plugin=pyside6 ^
+    --windows-icon-from-ico=assets/icons/logo.ico ^
+    --include-data-dir=assets=assets ^
+    --include-data-dir=getip=getip ^
+    --include-package=soundfile,sounddevice,win32com,win32api,win32con,pycaw ^
+    --include-data-file=updater.ps1=updater.ps1 ^
+    src/main.py
 
 if %errorlevel% neq 0 (
     echo.
