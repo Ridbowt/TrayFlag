@@ -1,3 +1,4 @@
-VER: 1.16.0
-LINK: https://github.com/Ridbowt/TrayFlag/releases/download/v1.16.0/TrayFlag_v1.16.0_win-x64.zip
-HASH: 2A927B8E8D4B44BAA6FA1A54A741AF1C6C7CE98F1C03F5C9B1E6CC4189BE1FEE
+VER: 1.17.0
+LINK: https://github.com/Ridbowt/TrayFlag/releases/download/v1.17.0/TrayFlag_v1.17.0_win-x64.zip
+HASH: 45BA7AFD83A948C5F0A3194BD03A16A96C9DE5304F9E1C563F27452C83243588
+CHANGELOG: Provider indicator; Full country names
