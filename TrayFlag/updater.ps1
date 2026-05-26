@@ -1,6 +1,6 @@
 <#
     File: updater.ps1
-    Version: 0.2.0
+    Version: 0.3.0
     Author: Ridbowt
     Description: Downloads and installs the latest version of TrayFlag with clean file replacement.
     Features:
@@ -17,7 +17,7 @@
 
 Write-Host "=========================" -ForegroundColor Green
 Write-Host "   TrayFlag Auto-Updater   " -ForegroundColor Green
-Write-Host "   Version 0.2.0           " -ForegroundColor Green
+Write-Host "   Version 0.3.0           " -ForegroundColor Green
 Write-Host "=========================" -ForegroundColor Green
 
 # Set UTF-8 encoding for proper character display
@@ -199,6 +199,13 @@ try {
     $zipUrl = $zipUrl.Trim()
     $expectedHash = $expectedHash.Trim()
 
+    # Parse changelog (optional, brief)
+    $changelog = ""
+    $changelogMatch = $versionLines | Where-Object { $_ -match "^CHANGELOG[:=]" } | Select-Object -First 1
+    if ($changelogMatch) {
+        $changelog = [string]($changelogMatch -replace "^CHANGELOG[:=]", "").Trim()
+    }
+
     # --- Validate parsed data ---
     if (-not $latestVersion) {
         throw "Could not find version info in GitHub file. File format may have changed."
@@ -225,9 +232,20 @@ try {
     Write-Host ""
     Write-Host "New version available: $currentVersion → $latestVersion" -ForegroundColor Yellow
 
+    # Show brief changelog if available
+    if ($changelog) {
+        Write-Host ""
+        Write-Host "What's new:" -ForegroundColor Cyan
+        $items = $changelog -split ';'
+        foreach ($item in $items) {
+            Write-Host "  • $($item.Trim())" -ForegroundColor Gray
+        }
+        Write-Host ""
+    }
+
     # --- User Confirmation ---
     # Check if running in interactive mode
-    if ($null -eq $variable) {
+    if ($null -eq $Host.UI.RawUI) {  # ← ✅ Правильная проверка
         Write-Host "Non-interactive mode detected. Proceeding with update..." -ForegroundColor Yellow
         $choice = 'y'
     } else {
