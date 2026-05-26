@@ -50,13 +50,8 @@ def get_ip_data():
     return None
 
 def get_full_data(ip_address):
-    """
-    Gets full geo-data for a known IP.
-    """
-    # --- STEP 3: Retrieve geo-data ---
     try:
         print(f"Fetching full data for {ip_address} via getip_ipinfo.ps1...")
-        # We need to pass the IP to the script. We'll do this via environment variables.
         env = os.environ.copy()
         env["TRAYFLAG_IP_TO_LOOKUP"] = ip_address
         
@@ -64,14 +59,18 @@ def get_full_data(ip_address):
         command = ["powershell", "-ExecutionPolicy", "Bypass", "-File", script_path]
         
         result = subprocess.run(
-            command,
-            capture_output=True, text=True, timeout=20,
-            creationflags=subprocess.CREATE_NO_WINDOW,
-            env=env
+            command, capture_output=True, text=True, timeout=20,
+            creationflags=subprocess.CREATE_NO_WINDOW, env=env
         )
         result.check_returncode()
-        return json.loads(result.stdout)
+        data = json.loads(result.stdout)
+        
+        # Extract ASN from full_data if available
+        if data.get('full_data'):
+            asn = data['full_data'].get('asn', '')
+            data['asn'] = asn
+        
+        return data
     except Exception as e:
         print(f"Full data fetch (ipinfo) failed: {e}")
-        # If it fails, at least return what we have (IP only)
-        return {'ip': ip_address, 'full_data': {}}
+        return {'ip': ip_address, 'full_data': {}, 'asn': ''}

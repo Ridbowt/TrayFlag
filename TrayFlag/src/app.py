@@ -7,7 +7,11 @@ import threading
 import requests
 from PySide6 import QtWidgets, QtGui, QtCore
 
-from utils import resource_path, create_no_internet_icon, set_autostart_shortcut, truncate_text, clean_isp_name, create_desktop_shortcut, run_updater_script
+from utils import (
+    resource_path, create_no_internet_icon, set_autostart_shortcut,
+    truncate_text, clean_isp_name, create_desktop_shortcut,
+    run_updater_script, get_country_name, is_warp_indicator_needed
+)
 from config import ConfigManager, SETTINGS_FILE_PATH
 from constants import __version__, RELEASE_DATE
 from translator import Translator, get_initial_language_code
@@ -71,7 +75,7 @@ class App(QtWidgets.QSystemTrayIcon):
         # Run the first update check 10 seconds after startup
         QtCore.QTimer.singleShot(10000, self.try_check_updates)
 
-        # Запуск таймера для проверки каждые 72 часа
+        # Starting the timer for checks every 72 hours
         threading.Thread(target=self._update_timer_thread, daemon=True).start()
 
     def _handle_first_launch_tasks(self):
@@ -159,12 +163,19 @@ class App(QtWidgets.QSystemTrayIcon):
             return
         data = self.state.current_location_data
         country_code = data.get('country_code', '')
-        icon = self._load_icon(f"{country_code}.png", "flags")
+        
+        # Check if WARP indicator is needed
+        isp = data.get('isp', '')
+        asn = data.get('asn', '')
+        show_warp = is_warp_indicator_needed(isp, asn)
+        
+        # Load flag icon with optional WARP indicator
+        icon = self._load_icon(f"{country_code}.png", "flags", show_warp_indicator=show_warp)
         self.setIcon(icon or self.app_icon)
         
         update_time_str = time.strftime("%H:%M:%S")
         tooltip_text = (f"{data.get('ip', 'N/A')}\n"
-                        f"{country_code.upper()}\n"
+                        f"{truncate_text(get_country_name(country_code), 17)}\n"  # ← Полное название + обрезка
                         f"{truncate_text(data.get('city', 'N/A'), 17)}\n"
                         f"{truncate_text(clean_isp_name(data.get('isp', 'N/A')), 17)}\n"
                         f"{self.tr.get('tooltip_updated_at', time=update_time_str)}")
@@ -300,7 +311,7 @@ class App(QtWidgets.QSystemTrayIcon):
         Runs in a background thread. Downloads, parses, and compares versions.
         """
         try:
-            url = "https://raw.githubusercontent.com/Ridbowt/TrayFlag/main/TrayFlagLastVersion.txt"
+            url = "https://raw.githubusercontent.com/Ridbowt/TrayFlag/refs/heads/main/TrayFlagLastVersion.txt"
             response = requests.get(url, timeout=15)
             response.raise_for_status() # Will raise an error if the status is not 200 OK
             
@@ -361,14 +372,44 @@ class App(QtWidgets.QSystemTrayIcon):
             print("[INFO] Tray icon clicked. Forcing IP update...")
             self.update_handler.update_location_icon(is_forced_by_user=True)
 
-    def _load_icon(self, filename, subfolder="icons", size=20):
+    def _load_icon(self, filename, subfolder="icons", size=20, show_warp_indicator=False):
+        """
+        Load an icon, optionally with WARP indicator dot.
+        """
         try:
             path = resource_path(os.path.join("assets", subfolder, filename))
-            if not os.path.isfile(path): return None
+            if not os.path.isfile(path):
+                return None
+            
             pixmap = QtGui.QPixmap(path)
-            return QtGui.QIcon(pixmap.scaled(size, size, QtCore.Qt.AspectRatioMode.KeepAspectRatio, QtCore.Qt.TransformationMode.SmoothTransformation))
+            pixmap = pixmap.scaled(size, size, QtCore.Qt.AspectRatioMode.KeepAspectRatio, 
+                                QtCore.Qt.TransformationMode.SmoothTransformation)
+            
+            # Draw WARP indicator if needed
+            if show_warp_indicator:
+                painter = QtGui.QPainter(pixmap)
+                painter.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
+                
+                # Bright orange dot with dark border
+                dot_size = 7  # ← Было 5, стало 7 (крупнее)
+                dot_color = QtGui.QColor("#FF8C00")  # ← Яркий оранжевый (было #FFA500)
+                border_color = QtGui.QColor("#2B2B2B")  # ← Тёмная обводка (контрастнее)
+                
+                # Position: bottom-right, 1px from edge
+                dot_x = size - dot_size - 1
+                dot_y = size - dot_size - 1
+                
+                # Draw border (circle) - thicker border
+                painter.setPen(QtGui.QPen(border_color, 2))  # ← Было 1, стало 2 (толще обводка)
+                painter.setBrush(dot_color)
+                painter.drawEllipse(dot_x, dot_y, dot_size, dot_size)
+                
+                painter.end()
+            
+            return QtGui.QIcon(pixmap)
         except Exception as e:
-            print(f"Error loading icon {filename}: {e}"); return None
+            print(f"Error loading icon {filename}: {e}")
+            return None
 
     def _load_pixmap(self, filename, size):
         try:

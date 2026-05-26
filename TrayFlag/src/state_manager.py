@@ -21,7 +21,7 @@ class AppState:
 
         # Update history only if IP actually changed
         if self.last_known_external_ip != current_ip:
-            if self.current_location_data: # Add the previous state to the history
+            if self.current_location_data:  # Add the previous state to the history
                 self.location_history.append(self.current_location_data)
             self.last_known_external_ip = current_ip
         
