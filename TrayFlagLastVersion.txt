@@ -1,4 +1,4 @@
-VER: 1.17.0
-LINK: https://github.com/Ridbowt/TrayFlag/releases/download/v1.17.0/TrayFlag_v1.17.0_win-x64.zip
-HASH: 45BA7AFD83A948C5F0A3194BD03A16A96C9DE5304F9E1C563F27452C83243588
-CHANGELOG: Provider indicator; Full country names
+VER: 1.18.0
+LINK: https://github.com/Ridbowt/TrayFlag/releases/download/v1.18.0/TrayFlag_v1.18.0_win-x64.zip
+HASH: D722741E0A302A73D59B0047BC9BC3E2D6C069FA9E2B499E2FB88B67E4426D04
+CHANGELOG: Rust IP lookup; Improved fallback; Fixed notification name; File metadata; Mistral AI link
