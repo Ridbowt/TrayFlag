@@ -1,0 +1,7 @@
+[workspace]
+members = [
+    "getip_ipify-org",
+    "getip_myip-com",
+    "getip_ipinfo-io"
+]
+resolver = "2"

@@ -8,6 +8,10 @@ from utils import resource_path, create_desktop_shortcut
 from constants import APP_NAME, ORG_NAME, __version__
 from translator import Translator
 
+import ctypes
+# Remove ".exe" from Windows notification titles
+ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("TrayFlag")
+
 # --- Code to check for a single instance ---
 try:
     import win32event

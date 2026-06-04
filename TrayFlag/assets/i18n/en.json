@@ -14,7 +14,7 @@
     "menu_ip_wait": "💻 IP: waiting...",
     "menu_city_wait": "📍 City: waiting...",
     "menu_isp_wait": "🏢 Provider: waiting...",
-    "menu_update_now": "🔄 Update Now",
+    "menu_update_now": "🔄 Update IP Now",
     "menu_history": "📜 History",
     "menu_history_empty": "History is empty",
     "menu_weblink": "🌐 Details in Browser",
@@ -26,13 +26,13 @@
     "about_website": "https://github.com/Ridbowt/TrayFlag",
     "about_telegram": "https://t.me/trayflag",
     "about_acknowledgements": "Acknowledgements & Resources",
-    "ack_ip_services": "<li><b>IP Geolocation Services:</b> <a href=\"https://www.ipify.org/\">ipify.org</a>, <a href=\"https://www.myip.com/\">myip.com</a>, <a href=\"https://ip-api.com/\">ip-api.com</a>, <a href=\"https://ipinfo.io/\">ipinfo.io</a>, <a href=\"https://www.ip-tracker.org/\">ip-tracker.org</a>, <a href=\"https://www.speedtest.net/\">speedtest.net</a>, <a href=\"https://ipleak.net/\">ipleak.net</a></li>",
+    "ack_ip_services": "<li><b>IP Geolocation Services:</b> <a href=\"https://www.ipify.org/\">ipify.org</a>, <a href=\"https://www.myip.com/\">myip.com</a>, <a href=\"https://ipinfo.io/\">ipinfo.io</a>, <a href=\"https://www.ip-tracker.org/\">ip-tracker.org</a>, <a href=\"https://www.speedtest.net/\">speedtest.net</a>, <a href=\"https://ipleak.net/\">ipleak.net</a></li>",
     "ack_flags": "<li><b>Country Flags:</b> <a href=\"https://github.com/lipis/flag-icons\">lipis/flag-icons</a></li>",
     "ack_app_icon": "<li><b>App Icons:</b> by <a href=\"https://www.freepik.com\">Freepik</a> from <a href=\"https://www.flaticon.com/free-icon/place_449970\">Flaticon</a>; </b> by <a href=\"https://www.flaticon.com/authors/vectors-market\">Vectors Market</a> from <a href=\"https://www.flaticon.com/free-icon/moon_740878\">Flaticon</a></li>",
     "ack_logo_builder": "<li><b>Logo Builder:</b> <a href=\"https://favicon.io/\">favicon.io</a></li>",
     "ack_sound": "<li><b>Sounds:</b> <a href=\"https://pixabay.com/users/universfield-28281460/\">pixabay.com</a> (Universfield - Error 08, New notification 09)</li>",
     "ack_code": "<li><b>Code & Ideas:</b> <a href=\"https://stackoverflow.com/a/46595209\">Stack Overflow</a></li>",
-    "ack_ai": "<li><b>AI Assistants:</b> <a href=\"https://aistudio.google.com/\">Google AI Studio</a>, <a href=\"https://chatgpt.com/\">ChatGPT</a></li>",
+    "ack_ai": "<li><b>AI Assistants:</b> <a href=\"https://aistudio.google.com/\">Google AI Studio</a>, <a href=\"https://chatgpt.com/\">ChatGPT</a>, <a href=\"https://chat.qwen.ai/\">Qwen</a>, <a href=\"https://chat.mistral.ai/\">Mistral AI</a></li>",
     "settings_dialog_title": "Settings for {app_name}",
     "settings_update_interval": "Update Interval:",
     "settings_update_tooltip": "Interval for IP checks.",
@@ -60,7 +60,7 @@
     "settings_idle_threshold": "Enter idle mode after:",
     "settings_idle_interval": "Update interval in idle mode:",
     "minutes": "min",
-    "tooltip_updated_at": "upd. at {time}",
+    "tooltip_updated_at": "• upd. at {time}",
 
     "menu_speedtest_browser": "🚀 Speedtest (in browser)",
     "menu_dns_leak_test": "🔍 Check for DNS Leaks",
@@ -76,11 +76,15 @@
     "button_no": "No",
 
     "about_check_for_updates": "🪄 Check for Updates...",        
-    "menu_check_for_updates": "🪄 Check for Updates...",
+    "menu_check_for_updates": "🟢 Up to date...",
+    "menu_update_available": "📦✨ Update available: {version}!",
 
     "about_tab_acknowledgements": "🛠️ Acknowledgements",
     "about_tab_sponsors": "❤️ Sponsors",
     "sponsors_list_empty": "Your name could be here! Support the project on Boosty.",
     "sponsors_list_error": "Could not load the sponsors list.",
-    "button_support_on_boosty": "💛 Support on Boosty"
+    "button_support_on_boosty": "💛 Support on Boosty",
+
+    "idle_mode_tooltip": "Idle mode active: updates are paused until activity resumes."
+
 }

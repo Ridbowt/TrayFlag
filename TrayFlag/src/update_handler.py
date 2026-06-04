@@ -124,12 +124,12 @@ class UpdateHandler(QtCore.QObject):
         # Always emit the signal on a forced update (exiting idle)
         if is_forced or last_ip is None or ip != last_ip:
             print(f"[SUCCESS] IP address update: {last_ip} -> {ip}")
-            full_data = get_full_data(ip)
+            full_data = get_full_data(ip, force=is_forced)
             self.state.last_known_ip = ip
             self.ipDataReceived.emit(full_data, is_forced)
         else:
             print("IP has not changed, but forced update or normal check.")
             # If forced (exiting idle), still update the icon
             if is_forced:
-                full_data = get_full_data(ip)
+                full_data = get_full_data(ip, force=is_forced)
                 self.ipDataReceived.emit(full_data, is_forced)

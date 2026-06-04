@@ -258,19 +258,17 @@ class App(QtWidgets.QSystemTrayIcon):
         self.menu_manager = TrayMenuManager(self)
         self.setContextMenu(self.menu_manager.menu)
         if self.state.current_location_data: self.menu_manager.update_menu_content()
-        # --- НАЧАЛО ИЗМЕНЕНИЙ ---
         if self.state.is_in_idle_mode:
-            # Если программа спит, принудительно обновляем текст тултипа на новом языке
+            # If the program is sleeping, forcibly update the tooltip text to the new language
             self.on_entered_idle_mode()
         elif self.state.last_known_external_ip == "N/A":
-            # Если сети нет, восстанавливаем иконку ошибки и текст
+            # If there is no network, restore the error icon and text
             self.setIcon(self.no_internet_icon)
             self.setToolTip(self.tr.get("tooltip_error_get_ip"))
-        # --- КОНЕЦ ИЗМЕНЕНИЙ ---
         # If update was already found earlier, re-apply it in new language
         if self.new_version_str:
             self.on_update_available(self.new_version_str, self.new_version_link)
-        # Принудительно проверяем обновления после смены языка
+        # Force check for updates after changing the language
         self.try_check_updates(force=True)
 
 
@@ -294,7 +292,7 @@ class App(QtWidgets.QSystemTrayIcon):
         ).start()
 
     def _update_timer_thread(self):
-        """Фоновый поток, проверяющий обновления каждые 72 часа."""
+        """# Background thread that checks for updates every 72 hours."""
         interval_sec = 72 * 60 * 60  # 72 часа
         while True:
             # Запускаем проверку
@@ -302,7 +300,7 @@ class App(QtWidgets.QSystemTrayIcon):
             # Ждём interval_sec секунд
             for _ in range(int(interval_sec)):
                 time.sleep(1)
-                # Можно прервать поток по условию, если понадобится
+                # The thread can be interrupted based on a condition if needed
 
 
 
@@ -353,7 +351,7 @@ class App(QtWidgets.QSystemTrayIcon):
         self.new_version_str = version
         self.new_version_link = link
         
-        # Находим наш QAction в объекте меню
+        # Find our QAction in the menu object
         update_action = self.menu_manager.update_action
         
         # Change the text
@@ -392,15 +390,15 @@ class App(QtWidgets.QSystemTrayIcon):
                 
                 # Bright orange dot with dark border
                 dot_size = 7  # ← Было 5, стало 7 (крупнее)
-                dot_color = QtGui.QColor("#FF8C00")  # ← Яркий оранжевый (было #FFA500)
-                border_color = QtGui.QColor("#2B2B2B")  # ← Тёмная обводка (контрастнее)
+                dot_color = QtGui.QColor("#FF8C00")  # ← Bright orange
+                border_color = QtGui.QColor("#2B2B2B")  # ← Dark outline
                 
                 # Position: bottom-right, 1px from edge
                 dot_x = size - dot_size - 1
                 dot_y = size - dot_size - 1
                 
                 # Draw border (circle) - thicker border
-                painter.setPen(QtGui.QPen(border_color, 2))  # ← Было 1, стало 2 (толще обводка)
+                painter.setPen(QtGui.QPen(border_color, 2))  # Outline
                 painter.setBrush(dot_color)
                 painter.drawEllipse(dot_x, dot_y, dot_size, dot_size)
                 

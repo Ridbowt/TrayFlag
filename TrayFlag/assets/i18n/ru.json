@@ -14,7 +14,7 @@
     "menu_ip_wait": "💻 IP: ожидание...",
     "menu_city_wait": "📍 Город: ожидание...",
     "menu_isp_wait": "🏢 Провайдер: ожидание...",
-    "menu_update_now": "🔄 Обновить сейчас",
+    "menu_update_now": "🔄 Обновить IP сейчас",
     "menu_history": "📜 История изменений",
     "menu_history_empty": "История пуста",
     "menu_weblink": "🌐 Подробнее в браузере",
@@ -26,13 +26,13 @@
     "about_website": "https://github.com/Ridbowt/TrayFlag",
     "about_telegram": "https://t.me/trayflag",
     "about_acknowledgements": "Благодарности и ресурсы",
-    "ack_ip_services": "<li><b>Сервисы геолокации IP:</b> <a href=\"https://www.ipify.org/\">ipify.org</a>, <a href=\"https://www.myip.com/\">myip.com</a>, <a href=\"https://ip-api.com/\">ip-api.com</a>, <a href=\"https://ipinfo.io/\">ipinfo.io</a>, <a href=\"https://www.ip-tracker.org/\">ip-tracker.org</a>, <a href=\"https://www.speedtest.net/\">speedtest.net</a>, <a href=\"https://ipleak.net/\">ipleak.net</a></li>",
+    "ack_ip_services": "<li><b>Сервисы геолокации IP:</b> <a href=\"https://www.ipify.org/\">ipify.org</a>, <a href=\"https://www.myip.com/\">myip.com</a>, <a href=\"https://ipinfo.io/\">ipinfo.io</a>, <a href=\"https://www.ip-tracker.org/\">ip-tracker.org</a>, <a href=\"https://www.speedtest.net/\">speedtest.net</a>, <a href=\"https://ipleak.net/\">ipleak.net</a></li>",
     "ack_flags": "<li><b>Иконки флагов:</b> <a href=\"https://github.com/lipis/flag-icons\">lipis/flag-icons</a></li>",
     "ack_app_icon": "<li><b>Иконки приложения:</b> от <a href=\"https://www.freepik.com\">Freepik</a> с <a href=\"https://www.flaticon.com/free-icon/place_449970\">Flaticon</a>; </b> от <a href=\"https://www.flaticon.com/authors/vectors-market\">Vectors Market</a> с <a href=\"https://www.flaticon.com/free-icon/moon_740878\">Flaticon</a></li>",
     "ack_logo_builder": "<li><b>Сборка логотипа:</b> <a href=\"https://favicon.io/\">favicon.io</a></li>",
     "ack_sound": "<li><b>Звуки:</b> <a href=\"https://pixabay.com/users/universfield-28281460/\">pixabay.com</a> (Universfield - Error 08, New notification 09)</li>",
     "ack_code": "<li><b>Идеи и код:</b> <a href=\"https://stackoverflow.com/a/46595209\">Stack Overflow</a></li>",
-    "ack_ai": "<li><b>ИИ-ассистенты:</b> <a href=\"https://aistudio.google.com/\">Google AI Studio</a>, <a href=\"https://chatgpt.com/\">ChatGPT</a></li>",
+    "ack_ai": "<li><b>ИИ-ассистенты:</b> <a href=\"https://aistudio.google.com/\">Google AI Studio</a>, <a href=\"https://chatgpt.com/\">ChatGPT</a>, <a href=\"https://chat.qwen.ai/\">Qwen</a>, <a href=\"https://chat.mistral.ai/\">Mistral AI</a></li>",
     "settings_dialog_title": "Настройки {app_name}",
     "settings_update_interval": "Интервал обновления:",
     "settings_update_tooltip": "Интервал для проверок IP.",
@@ -60,7 +60,7 @@
     "settings_idle_threshold": "Переходить в экономный режим через:",
     "settings_idle_interval": "Интервал обновления в простое:",
     "minutes": "мин",          
-    "tooltip_updated_at": "обн. в {time}",
+    "tooltip_updated_at": "• обн. в {time}",
 
     "menu_speedtest_browser": "🚀 Проверить скорость (в браузере)",
     "menu_dns_leak_test": "🔍 Проверить утечку DNS",
@@ -76,11 +76,15 @@
     "button_no": "Нет",
 
     "about_check_for_updates": "🪄 Проверить обновления...",        
-    "menu_check_for_updates": "🪄 Проверить обновления...",  
+    "menu_check_for_updates": "🟢 Обновлений нет...",
+    "menu_update_available": "📦✨ Доступно обновление: {version}!",
 
     "about_tab_acknowledgements": "🛠️ Благодарности",
     "about_tab_sponsors": "❤️ Спонсоры",
     "sponsors_list_empty": "Здесь может быть ваше имя! Поддержите проект на Boosty.",
     "sponsors_list_error": "Не удалось загрузить список спонсоров.",
-    "button_support_on_boosty": "💛 Поддержать на Boosty"
+    "button_support_on_boosty": "💛 Поддержать на Boosty",
+
+    "idle_mode_tooltip": "Экономный режим активен: обновления приостанавливаются до выхода из простоя."
+
 }
